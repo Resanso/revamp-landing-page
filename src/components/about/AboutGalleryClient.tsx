@@ -18,7 +18,7 @@ export default function AboutGalleryClient({
       setCurrentIndex((prev) => (prev + 1) % slides.length);
     }, 5000); // 5 detik
 
-    return () => clearInterval(interval); 
+    return () => clearInterval(interval);
   }, [slides]);
 
   const displaySlides = [...slides, ...slides, ...slides];
@@ -45,9 +45,9 @@ export default function AboutGalleryClient({
                 <Image
                   src={slide.src}
                   alt={slide.alt || "Gallery image"}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 33vw"
+                  width={800}
+                  height={600}
+                  className="w-full h-full object-cover"
                 />
               </div>
             </div>
