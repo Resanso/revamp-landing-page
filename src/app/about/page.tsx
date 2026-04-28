@@ -13,8 +13,9 @@ export const metadata = {
 
 export default async function AboutPage() {
   return (
-    <main className="min-h-screen w-full pt-14 pb-0 flex flex-col gap-16 md:gap-24 mb-16 md:mb-24">
+    <main className="min-h-screen w-full pt-14 pb-0 flex flex-col gap-16 md:gap-30 mb-16 md:mb-24">
       <div className="mx-auto w-full max-w-6xl px-4 md:px-8">
+
         <nav className="mb-5 flex items-center gap-2 text-sm text-black/50">
           <Link href="/" className="hover:text-black">
             Home

@@ -1,7 +1,3 @@
-import { ReactNode } from "react";
-import { MdPersonSearch } from "react-icons/md";
-import { FaGlobe, FaCubes } from "react-icons/fa";
-
 export type AboutSlide = {
   src: string;
   alt: string;
@@ -9,21 +5,21 @@ export type AboutSlide = {
 
 export type AboutMission = {
   title: string;
-  icon: ReactNode;
+  icon: string;
 };
 
 export const aboutMissions: AboutMission[] = [
   {
     title: "Membangun Sistem Talent Scouting dan Informasi yang Terintegrasi",
-    icon: <MdPersonSearch className="text-[#FFC72C] text-[64px] mb-6" />,
+    icon: "/images/about/icon1.svg",
   },
   {
     title: "Menyelenggarakan Pembinaan Teknis dan Strategis yang Berkelanjutan",
-    icon: <FaGlobe className="text-[#FFC72C] text-[60px] mb-6" />,
+    icon: "/images/about/icon2.svg",
   },
   {
     title: "Mentransformasi Ide Inovatif Menjadi Produk Teknologi yang Solutif",
-    icon: <FaCubes className="text-[#FFC72C] text-[60px] mb-6" />,
+    icon: "/images/about/icon3.svg",
   },
 ];
 
