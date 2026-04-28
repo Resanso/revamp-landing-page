@@ -1,9 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight2 } from "iconsax-react";
 import { aboutSlides } from "@/data/about-content";
 import AboutGalleryClient from "@/components/about/AboutGalleryClient";
 import AboutVision from "@/components/about/AboutVision";
+import AboutMission from "@/components/about/AboutMission";
 
 export const metadata = {
   title: "About | Prodigi",
@@ -13,7 +13,7 @@ export const metadata = {
 
 export default async function AboutPage() {
   return (
-    <main className="min-h-screen w-full pt-14 pb-0">
+    <main className="min-h-screen w-full pt-14 pb-0 flex flex-col gap-16 md:gap-24 mb-16 md:mb-24">
       <div className="mx-auto w-full max-w-6xl px-4 md:px-8">
         <nav className="mb-5 flex items-center gap-2 text-sm text-black/50">
           <Link href="/" className="hover:text-black">
@@ -23,11 +23,11 @@ export default async function AboutPage() {
           <span className="text-black/70">About</span>
         </nav>
 
-        <div className="max-w-fit mb-12">
+        <div className="max-w-4xl mb-12">
           <h1 className="text-5xl md:text-6xl font-extrabold mb-6 text-black tracking-tight">
             About <span className="text-[#FFC72C]">Prodigi</span>
           </h1>
-          <p className="text-gray-700 text-md leading-relaxed">
+          <p className="text-gray-700 text-md md:text-lg leading-relaxed">
             PRODIGI is a community of competitive and innovative students in the
             Faculty of Informatics, under the Digital Talent Centre (DTC)
             Laboratory. We focus on developing technical skills, fostering
@@ -39,8 +39,9 @@ export default async function AboutPage() {
         <AboutGalleryClient slides={aboutSlides} />
       </div>
 
-      {/* Vision Section */}
       <AboutVision />
+
+      <AboutMission />
     </main>
   );
 }
