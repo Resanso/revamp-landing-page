@@ -1,8 +1,11 @@
+"use client";
+
 import { FaGithub, FaInstagram, FaLinkedinIn } from "react-icons/fa";
 import { footerColumns, socialLinks } from "@/data/landing-content";
 
 import Image from "next/image";
 import SectionContainer from "@/components/landing/ui/SectionContainer";
+import { useContactModal } from "@/components/landing/ui/ContactModalContext";
 
 const socialIconMap = {
   GitHub: FaGithub,
@@ -11,6 +14,8 @@ const socialIconMap = {
 } as const;
 
 export default function Footer() {
+  const { openContactModal } = useContactModal();
+
   return (
     <footer className="relative overflow-hidden bg-[#0f1012] py-14 text-white">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_20%,rgba(255,255,255,0.08),transparent_50%),radial-gradient(circle_at_90%_85%,rgba(255,201,31,0.08),transparent_52%)]" />
@@ -22,7 +27,8 @@ export default function Footer() {
           </div>
           <button
             type="button"
-            className="rounded-sm bg-[#ffc91f] px-5 py-3 text-sm font-semibold text-black"
+            onClick={() => openContactModal("contact")}
+            className="rounded-sm bg-[#ffc91f] px-5 py-3 text-sm font-semibold text-black cursor-pointer transition hover:bg-[#ffb901]"
           >
             CONTACT US
           </button>
@@ -38,7 +44,7 @@ export default function Footer() {
               className="object-contain"
             />
             <p className="mt-5 text-white/90">
-              PRODIGI is a community of competitive & innovative student in
+              PRODIGI is a community of competitive &amp; innovative student in
               Faculty of Informatics, under Digital Talent Centre (DTC)
               Laboratory.
             </p>

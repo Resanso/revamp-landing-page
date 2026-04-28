@@ -14,6 +14,7 @@ import { useEffect, useMemo, useState } from "react";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
+import { useContactModal } from "@/components/landing/ui/ContactModalContext";
 
 const iconMap = {
   Flag2,
@@ -24,6 +25,7 @@ const iconMap = {
 } as const;
 
 export default function Hero() {
+  const { openContactModal } = useContactModal();
   const [activeSlide, setActiveSlide] = useState(0);
   const [headerHeight, setHeaderHeight] = useState(170);
 
@@ -98,16 +100,33 @@ export default function Hero() {
             {heroActions.map((action, index) => {
               const ActionIcon = iconMap[action.icon as keyof typeof iconMap];
 
+              const sharedClassName = `flex items-center justify-between gap-3 px-5 py-4 text-left text-sm font-medium transition sm:text-base ${
+                index === 0
+                  ? "bg-[#ffc91f] text-black hover:bg-[#ffb901]"
+                  : "bg-white text-[#171717] hover:bg-[#f6f6f6]"
+              } ${index < heroActions.length - 1 ? "border-b border-black/10" : ""} ${index % 2 === 0 ? "sm:border-r sm:border-black/10" : ""} ${index < 2 ? "sm:border-b sm:border-black/10" : "sm:border-b-0"}`;
+
+              /* Partnership opens the modal */
+              if (action.label === "Partnership") {
+                return (
+                  <button
+                    key={action.label}
+                    type="button"
+                    onClick={() => openContactModal("partnership")}
+                    className={sharedClassName}
+                  >
+                    <ActionIcon size="18" color="currentColor" variant="Linear" />
+                    <span className="flex-1">{action.label}</span>
+                  </button>
+                );
+              }
+
               return (
                 <Link
                   key={action.label}
                   type="button"
                   href={action.href}
-                  className={`flex items-center justify-between gap-3 px-5 py-4 text-left text-sm font-medium transition sm:text-base ${
-                    index === 0
-                      ? "bg-[#ffc91f] text-black hover:bg-[#ffb901]"
-                      : "bg-white text-[#171717] hover:bg-[#f6f6f6]"
-                  } ${index < heroActions.length - 1 ? "border-b border-black/10" : ""} ${index % 2 === 0 ? "sm:border-r sm:border-black/10" : ""} ${index < 2 ? "sm:border-b sm:border-black/10" : "sm:border-b-0"}`}
+                  className={sharedClassName}
                 >
                   <ActionIcon size="18" color="currentColor" variant="Linear" />
                   <span className="flex-1">{action.label}</span>

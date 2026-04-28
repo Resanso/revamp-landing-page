@@ -13,6 +13,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { createPortal } from "react-dom";
+import { useContactModal } from "@/components/landing/ui/ContactModalContext";
 
 const socialIconMap = {
   GitHub: FaGithub,
@@ -41,6 +42,7 @@ function isGroupedColumns(columns: unknown[]): columns is NavGroupedColumn[] {
 }
 
 export default function Header() {
+  const { openContactModal } = useContactModal();
   const [hasMounted, setHasMounted] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -267,6 +269,14 @@ export default function Header() {
                   <span>{item.label}</span>
                   <ArrowDown2 size="12" color="currentColor" variant="Linear" />
                 </button>
+              ) : item.link === "/contact" ? (
+                <button
+                  type="button"
+                  onClick={() => openContactModal("contact")}
+                  className="flex items-center gap-2 px-4 py-4 text-[15px] text-[#232323] transition hover:text-[#ffb901] cursor-pointer hover:font-medium"
+                >
+                  <span>{item.label}</span>
+                </button>
               ) : (
                 <Link
                   href={item.link}
@@ -365,6 +375,22 @@ export default function Header() {
                     <div className="space-y-1">
                       {mainNavItems.map((item) => {
                         if (!item.columns) {
+                          if (item.link === "/contact") {
+                            return (
+                              <button
+                                key={item.label}
+                                type="button"
+                                onClick={() => {
+                                  setIsMobileMenuOpen(false);
+                                  setOpenMobileMegaMenu(null);
+                                  openContactModal("contact");
+                                }}
+                                className="flex w-full items-center justify-between rounded-sm px-2 py-3 text-left text-[15px] font-semibold text-[#232323] transition hover:bg-black/5 hover:text-[#ffb901]"
+                              >
+                                <span>{item.label}</span>
+                              </button>
+                            );
+                          }
                           return (
                             <Link
                               key={item.label}

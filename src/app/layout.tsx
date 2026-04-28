@@ -1,4 +1,5 @@
 import { TRPCReactProvider } from "@/trpc/client";
+import { ContactModalProvider } from "@/components/landing/ui/ContactModalContext";
 import "./globals.css";
 
 import type { Metadata } from "next";
@@ -23,7 +24,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${jakartaSans.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <TRPCReactProvider>{children}</TRPCReactProvider>
+        <TRPCReactProvider>
+          <ContactModalProvider>{children}</ContactModalProvider>
+        </TRPCReactProvider>
       </body>
     </html>
   );

@@ -1,8 +1,12 @@
+"use client";
+
 import Image from "next/image";
-import Link from "next/link";
 import SectionContainer from "@/components/landing/ui/SectionContainer";
+import { useContactModal } from "@/components/landing/ui/ContactModalContext";
 
 export default function PartnersSection() {
+  const { openContactModal } = useContactModal();
+
   const partners = [
     {
       name: "Bandung Techno Park",
@@ -34,18 +38,20 @@ export default function PartnersSection() {
           </p>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/contact?type=partnership"
-              className="rounded-sm bg-[#ffc91f] px-6 py-3 text-sm font-semibold text-black transition hover:bg-[#ffb901]"
+            <button
+              type="button"
+              onClick={() => openContactModal("partnership")}
+              className="rounded-sm bg-[#ffc91f] px-6 py-3 text-sm font-semibold text-black cursor-pointer transition hover:bg-[#ffb901]"
             >
               Become a Partner
-            </Link>
-            <Link
-              href="/contact?type=sponsorship"
-              className="rounded-sm border border-black/15 bg-white px-6 py-3 text-sm font-semibold text-black/80 transition hover:border-[#ffb901] hover:text-black"
+            </button>
+            <button
+              type="button"
+              onClick={() => openContactModal("sponsorship")}
+              className="rounded-sm border border-black/15 bg-white px-6 py-3 text-sm font-semibold text-black/80 cursor-pointer transition hover:border-[#ffb901] hover:text-black"
             >
               Sponsor Our Program
-            </Link>
+            </button>
           </div>
 
           <div className="relative mt-10 overflow-hidden">
