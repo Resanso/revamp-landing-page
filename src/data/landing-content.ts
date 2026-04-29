@@ -172,14 +172,84 @@ export const courses = [
   "Department of Law",
 ];
 
-export const aboutLinks = [
-  "Competitive Programming ",
-  "Data Mining ",
-  "Cybersecurity ",
-  "Entrepreneurship ",
-  "Innovation ",
-  "Media & Design",
-  "Partnership ",
+export type Departements = {
+  id: number;
+  img: string;
+  title: string;
+  description: string;
+};
+
+export const departements: Departements[] = [
+  {
+    id: 1,
+    img: "/images/departements/CP.png",
+    title: "Competitive Programming",
+    description:
+      "Focuses on developing strong problem-solving and algorithmic thinking skills through competitive programming challenges and intensive practice.",
+  },
+  {
+    id: 2,
+    img: "/images/departements/DM.png",
+    title: "Data Mining",
+    description:
+      "Focuses on analyzing data and extracting valuable insights from large datasets to support data-driven decision-making and solve real-world problems effectively.",
+  },
+  {
+    id: 3,
+    img: "/images/departements/cyber.png",
+    title: "Cybersecurity",
+    description:
+      "Focuses on cybersecurity by understanding digital threats and learning how to protect systems through practical and hands-on approaches.",
+  },
+  {
+    id: 4,
+    img: "/images/departements/entrepreneurship.png",
+    title: "Entrepreneurship",
+    description:
+      "Encourages students to develop innovative business ideas and transform them into impactful technology-based solutions with real market potential.",
+  },
+  {
+    id: 5,
+    img: "/images/departements/EO.png",
+    title: "Event Organizer",
+    description:
+      " Responsible for planning and executing events, ensuring each program runs smoothly and delivers an engaging and impactful experience for participants.",
+  },
+  {
+    id: 6,
+    img: "/images/departements/EO.png", // belum ada image fix
+    title: "Human Capital",
+    description:
+      "Responsible for developing members’ skills, fostering personal growth, and maintaining a supportive and collaborative environment.",
+  },
+  {
+    id: 7,
+    img: "/images/departements/innovation.png",
+    title: "Innovation",
+    description:
+      "Focuses on creating creative and innovative solutions to address real-world challenges through technology.",
+  },
+  {
+    id: 8,
+    img: "/images/departements/EO.png", // belum ada image fix
+    title: "Media & Design",
+    description:
+      "Handles content creation and manages social media to build a strong brand identity and engage with a wider audience",
+  },
+  {
+    id: 9,
+    img: "/images/departements/EO.png", // belum ada image fix
+    title: "Partnership",
+    description:
+      " Builds and maintains relationships with external partners to support programs, collaborations, and organizational growth.",
+  },
+  {
+    id: 10,
+    img: "/images/departements/EO.png", // belum ada image fix
+    title: "Product Team",
+    description:
+      "Focuses on designing and developing digital products PRODIGI, turning ideas into functional and user-centered solutions.",
+  },
 ];
 
 export const footerColumns = {
