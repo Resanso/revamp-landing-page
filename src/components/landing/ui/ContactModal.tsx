@@ -14,6 +14,7 @@ export type ContactModalType = "contact" | "partnership" | "sponsorship";
 type ContactModalProps = {
   isOpen: boolean;
   type: ContactModalType;
+  programName?: string;
   onClose: () => void;
 };
 
@@ -23,7 +24,11 @@ type ContactModalProps = {
 
 const WA_PHONE = "6282249278506"; // +62 822-4927-8506 — Khilfa
 
-function buildWaUrl(type: ContactModalType, data: FormData): string {
+function buildWaUrl(
+  type: ContactModalType,
+  data: FormData,
+  programName?: string,
+): string {
   let text = "";
 
   switch (type) {
@@ -51,10 +56,9 @@ function buildWaUrl(type: ContactModalType, data: FormData): string {
     case "sponsorship": {
       const fullName = data.get("fullName") as string;
       const institution = data.get("institution") as string;
-      const program = data.get("program") as string;
       text = [
         `Halo, perkenalkan saya ${fullName} dari ${institution}.`,
-        `Saya menghubungi melalui website dan tertarik untuk menjadi sponsor pada program ${program}.`,
+        `Saya menghubungi melalui website dan tertarik untuk menjadi sponsor pada program ${programName ?? "PRODIGI"}.`,
         `Mohon informasi lebih lanjut terkait detail program serta peluang kerja sama sponsorship yang tersedia.`,
         `Terima kasih.`,
       ].join("\n");
@@ -137,12 +141,6 @@ const variantConfig: Record<
         placeholder: "Your organization or company",
         type: "input",
       },
-      {
-        name: "program",
-        label: "Program",
-        placeholder: "Which program do you want to sponsor?",
-        type: "input",
-      },
     ],
   },
 };
@@ -154,6 +152,7 @@ const variantConfig: Record<
 export default function ContactModal({
   isOpen,
   type,
+  programName,
   onClose,
 }: ContactModalProps) {
   const [hasMounted, setHasMounted] = useState(false);
@@ -205,7 +204,7 @@ export default function ContactModal({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const waUrl = buildWaUrl(type, formData);
+    const waUrl = buildWaUrl(type, formData, programName);
 
     window.open(waUrl, "_blank", "noopener,noreferrer");
     onClose();

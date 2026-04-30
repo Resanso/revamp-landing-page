@@ -11,7 +11,7 @@ import type { ReactNode } from "react";
 /* ------------------------------------------------------------------ */
 
 type ContactModalContextValue = {
-  openContactModal: (type: ContactModalType) => void;
+  openContactModal: (type: ContactModalType, programName?: string) => void;
 };
 
 const ContactModalContext = createContext<ContactModalContextValue | null>(null);
@@ -23,9 +23,11 @@ const ContactModalContext = createContext<ContactModalContextValue | null>(null)
 export function ContactModalProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [modalType, setModalType] = useState<ContactModalType>("contact");
+  const [programName, setProgramName] = useState<string | undefined>();
 
-  const openContactModal = useCallback((type: ContactModalType) => {
+  const openContactModal = useCallback((type: ContactModalType, program?: string) => {
     setModalType(type);
+    setProgramName(program);
     setIsOpen(true);
   }, []);
 
@@ -39,6 +41,7 @@ export function ContactModalProvider({ children }: { children: ReactNode }) {
       <ContactModal
         isOpen={isOpen}
         type={modalType}
+        programName={programName}
         onClose={closeContactModal}
       />
     </ContactModalContext.Provider>

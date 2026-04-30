@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import SectionContainer from "@/components/landing/ui/SectionContainer";
 import { useContactModal } from "@/components/landing/ui/ContactModalContext";
 
@@ -45,13 +46,12 @@ export default function PartnersSection() {
             >
               Become a Partner
             </button>
-            <button
-              type="button"
-              onClick={() => openContactModal("sponsorship")}
+            <Link
+              href="/our-program"
               className="rounded-sm border border-black/15 bg-white px-6 py-3 text-sm font-semibold text-black/80 cursor-pointer transition hover:border-[#ffb901] hover:text-black"
             >
               Sponsor Our Program
-            </button>
+            </Link>
           </div>
 
           <div className="relative mt-10 overflow-hidden">
