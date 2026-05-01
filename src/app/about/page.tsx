@@ -15,7 +15,6 @@ export default async function AboutPage() {
   return (
     <main className="min-h-screen w-full pt-14 pb-0 flex flex-col gap-16 md:gap-30 mb-16 md:mb-24">
       <div className="mx-auto w-full max-w-6xl px-4 md:px-8">
-
         <nav className="mb-5 flex items-center gap-2 text-sm text-black/50">
           <Link href="/" className="hover:text-black">
             Home
@@ -24,11 +23,11 @@ export default async function AboutPage() {
           <span className="text-black/70">About</span>
         </nav>
 
-        <div className="max-w-4xl mb-12">
-          <h1 className="text-5xl md:text-6xl font-extrabold mb-6 text-black tracking-tight">
+        <div className="max-w-fit mb-12">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-black tracking-tight">
             About <span className="text-[#FFC72C]">Prodigi</span>
           </h1>
-          <p className="text-gray-700 text-md md:text-lg leading-relaxed">
+          <p className="text-gray-700 text-[16px]  leading-relaxed">
             PRODIGI is a community of competitive and innovative students in the
             Faculty of Informatics, under the Digital Talent Centre (DTC)
             Laboratory. We focus on developing technical skills, fostering

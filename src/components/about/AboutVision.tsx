@@ -15,7 +15,7 @@ export default function AboutVision() {
 
       <div className="relative z-20 flex flex-col items-center max-w-4xl mx-auto">
         <h2 className="text-4xl font-bold text-[#FFC72C] mb-6">Our Vision</h2>
-        <p className="text-gray-200 text-lg md:text-[20px] font-normal leading-relaxed mb-10 max-w-4xl">
+        <p className="text-gray-200 text-md md:text-[20px] font-light leading-relaxed mb-10 max-w-4xl">
           Menjadi pusat inkubasi prestasi dan inovasi teknologi terdepan di
           Fakultas Informatika yang melahirkan talenta kompetitif berkibar di
           level nasional maupun internasional melalui karya yang berdampak
