@@ -62,24 +62,24 @@ export const mainNavItems = [
         links: [
           {
             label: "Gemastik",
-            href: "#",
+            href: "https://static-gemastik18.telkomuniversity.ac.id/Panduan%20GEMASTIK%202025.pdf?_gl=1*mlyals*_ga*MTU4NjEwNjIxMi4xNzc1MzU5NDI5*_ga_0VSYWXVH4F*czE3Nzc3MTI1NzMkbzQkZzAkdDE3Nzc3MTI1NzMkajYwJGwwJGgw*_ga_43N69PWNNS*czE3Nzc3MTI1NzMkbzQkZzAkdDE3Nzc3MTI1NzMkajYwJGwwJGgw",
           },
           {
             label: "LIDM",
-            href: "#",
+            href: "https://asp.pnl.ac.id/storage/download/1754555207_Panduan-Lomba-Inovasi-Digital-Mahasiswa-Tahun-2025.pdf",
           },
           {
             label: "Satria Data",
-            href: "#",
+            href: "https://www.scribd.com/document/892415185/Panduan-Satria-Data-2025",
           },
           {
             label: "PKM",
-            href: "#",
+            href: "https://simbelmawa.kemdiktisaintek.go.id/portal/wp-content/uploads/2026/03/PANDUAN-PKM-2026_versi_full.pdf",
           },
           {
             label: "P2MW",
-            href: "#",
-          },
+            href: "https://p2mw.kemdiktisaintek.go.id/uploads/downloads/panduan_program_pembinaan_mahasiswa_wirausaha_tahun_2026_1771403502.pdf",
+          }
         ],
       },
       {
@@ -107,7 +107,7 @@ export const heroActions = [
     href: "https://instagram.com/helloprodigi",
   },
   { label: "Partnership", icon: "TagUser", href: "#" },
-  { label: "Our Programs", icon: "Calendar", href: "#" },
+  { label: "Our Programs", icon: "Calendar", href: "/our-program" },
 ];
 
 export const heroSlides = [

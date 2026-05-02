@@ -21,7 +21,7 @@ export const PROGRAMS: Program[] = [
         title: "ADIKARA",
         category: "Competition",
         description:
-            "Adikara is an internal competition at the Faculty of Informatics, Telkom University, fostering competitiveness, creativity, and innovation among students.",
+            "Adikara (Ajang Digital Kreatif dan Inovasi Informatika) is an internal competition at the Faculty of Informatics, Telkom University, aimed at developing technical skills, creativity, and entrepreneurial spirit through innovative and challenging competitions across five fields: Competitive Programming, Data Mining, Cyber Security, Entrepreneurship, and Innovation.",
         image: "/images/program/adikara.png",
         slug: "adikara",
     },
@@ -30,7 +30,7 @@ export const PROGRAMS: Program[] = [
         title: "Kick-Off Belmawa",
         category: "Kick-Off",
         description:
-            "Belmawa Kick-Off introduces three major competitions:\n1. GEMASTIK\n2. LIDM\n3. Satria Data",
+            "Belmawa Kick-Off is an introductory program organized by PRODiGi, Faculty of Informatics, Telkom University, aimed at preparing students for national-level competitions by introducing three major competitions—GEMASTIK, LIDM, and Satria Data—while fostering innovation, digital creativity, and data-driven problem solving.",
         image: "/images/program/kick-off-belmawa.png",
         slug: "kick-off-belmawa",
     },
@@ -39,7 +39,7 @@ export const PROGRAMS: Program[] = [
         title: "Belmawa Competition Mentoring",
         category: "Mentoring",
         description:
-            "A focused mentoring program to prepare students for Belmawa competitions through training, guidance, and hands-on practice.",
+            "Belmawa Competition Mentoring is a structured program organized by PRODiGi, Faculty of Informatics, Telkom University, aimed at preparing students for Belmawa competitions through intensive training, expert guidance, and hands-on practice to enhance technical skills, strategy, and competitiveness.",
         image: "/images/program/belmawa-competition-mentoring.png",
         slug: "belmawa-competition-mentoring",
     },

@@ -4,11 +4,9 @@ import { PROGRAMS, PROGRAM_CATEGORY_COLORS } from "@/lib/programs";
 import { ArrowRight2 } from "iconsax-react";
 
 import Image from "next/image";
-import { useContactModal } from "@/components/landing/ui/ContactModalContext";
+import Link from "next/link";
 
 export default function ProgramCards() {
-    const { openContactModal } = useContactModal();
-
     return (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {PROGRAMS.map((program) => (
@@ -42,20 +40,19 @@ export default function ProgramCards() {
                             {program.description}
                         </p>
 
-                        {/* Arrow Button → opens sponsorship modal */}
+                        {/* Arrow Button → navigates to detail page */}
                         <div className="mt-4 flex justify-end">
-                            <button
-                                type="button"
-                                onClick={() => openContactModal("sponsorship", program.title)}
+                            <Link
+                                href={`/our-program/${program.slug}`}
                                 className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-sm border border-black/15 text-black/50 transition hover:border-[#ffc91f] hover:bg-[#ffc91f] hover:text-black"
-                                aria-label={`Sponsor ${program.title}`}
+                                aria-label={`View detail ${program.title}`}
                             >
                                 <ArrowRight2
                                     size="14"
                                     color="currentColor"
                                     variant="Linear"
                                 />
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 </article>

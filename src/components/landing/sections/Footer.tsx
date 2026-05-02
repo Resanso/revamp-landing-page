@@ -21,14 +21,14 @@ export default function Footer() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_20%,rgba(255,255,255,0.08),transparent_50%),radial-gradient(circle_at_90%_85%,rgba(255,201,31,0.08),transparent_52%)]" />
       <SectionContainer className="relative z-10 max-w-6xl">
         <div className="mb-10 flex flex-wrap items-center justify-between gap-6 border-b border-white/15 pb-8">
-          <div className="space-y-2 text-sm text-white/80 font-bold">
+          <div className="space-y-2 text-base text-white font-medium">
             <p>WE ARE OPEN!</p>
             <p>Reach us to know more about us.</p>
           </div>
           <button
             type="button"
             onClick={() => openContactModal("contact")}
-            className="rounded-sm bg-[#ffc91f] px-5 py-3 text-sm font-semibold text-black cursor-pointer transition hover:bg-[#ffb901]"
+            className="rounded-sm bg-[#ffc91f] px-5 py-3 text-base font-bold text-black cursor-pointer transition hover:bg-[#ffb901]"
           >
             CONTACT US
           </button>
@@ -43,33 +43,33 @@ export default function Footer() {
               height={30}
               className="object-contain"
             />
-            <p className="mt-5 text-white/90">
+            <p className="mt-5 text-base font-light text-white">
               PRODIGI is a community of competitive &amp; innovative student in
               Faculty of Informatics, under Digital Talent Centre (DTC)
               Laboratory.
             </p>
           </div>
           <div>
-            <p className="mb-3 text-white/70 font-bold">Address</p>
-            <p className="mb-3 text-white/90">
+            <p className="mb-3 text-base font-medium text-white">Address</p>
+            <p className="mb-3 text-base font-light text-white">
               Program Development and Innovation Group of Informatics,
               Laboratorium Digital Talent Centre, Faculty of Informatics
             </p>
-            <p className="mb-3 text-white/90">
+            <p className="mb-3 text-base font-light text-white">
               Telkom University Landmark Tower (TULT) Building, 15 Floor, Room
               1508, Telekomunikasi Street No.1, Bandung - 40257
             </p>
           </div>
           <div>
-            <p className="mb-3 text-white/70 font-bold">Resources</p>
-            <ul className="space-y-2 text-white/90">
+            <p className="mb-3 text-base font-medium text-white">Resource</p>
+            <ul className="space-y-2 text-base font-light text-white">
               {footerColumns.resources.map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ul>
           </div>
           <div>
-            <p className="mb-3 text-white/70 font-bold">Follow Us</p>
+            <p className="mb-3 text-base font-medium text-white">Follow Us</p>
             <div className="flex items-center gap-3">
               {socialLinks.map((item) => {
                 const Icon =
