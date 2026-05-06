@@ -10,9 +10,7 @@ export default function SectionContainer({
   className = "",
 }: SectionContainerProps) {
   return (
-    <section
-      className={`mx-auto w-full max-w-[1200px] px-4 md:px-8 ${className}`}
-    >
+    <section className={`mx-auto w-full max-w-300 px-4 md:px-8 ${className}`}>
       {children}
     </section>
   );

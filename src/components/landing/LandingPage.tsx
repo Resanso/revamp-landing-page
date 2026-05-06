@@ -1,4 +1,4 @@
-import About from "@/components/landing/sections/About";
+import Departements from "@/components/landing/sections/Departements";
 import Courses from "@/components/landing/sections/Courses";
 import FindWay from "@/components/landing/sections/FindWay";
 import Footer from "@/components/landing/sections/Footer";
@@ -15,7 +15,7 @@ export default function LandingPage() {
       <main className="space-y-0">
         <Hero />
         <SuccessStats />
-        <About />
+        <Departements />
         <FindWay />
         <Courses />
         <Updates />

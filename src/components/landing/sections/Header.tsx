@@ -13,6 +13,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { createPortal } from "react-dom";
+import { useContactModal } from "@/components/landing/ui/ContactModalContext";
 
 const socialIconMap = {
   GitHub: FaGithub,
@@ -41,6 +42,7 @@ function isGroupedColumns(columns: unknown[]): columns is NavGroupedColumn[] {
 }
 
 export default function Header() {
+  const { openContactModal } = useContactModal();
   const [hasMounted, setHasMounted] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -203,7 +205,7 @@ export default function Header() {
               <Link
                 key={index}
                 href={item.href}
-                className={`px-3 py-4 text-sm text-black/80 transition hover:text-[#ffb901] hover:font-medium ${
+                className={`px-3 py-4 text-base font-medium text-[#6C6C6C] transition hover:text-[#ffb901] ${
                   index < topBarMainLinks.length - 1
                     ? ""
                     : "border-r border-black/10 pr-6"
@@ -238,12 +240,12 @@ export default function Header() {
               <input
                 type="text"
                 placeholder="Search here..."
-                className="w-55 border-0 bg-transparent px-3 text-sm outline-none"
+                className="w-55 border-0 bg-transparent px-3 text-base font-medium text-[#A9A9A9] placeholder:text-[#A9A9A9] outline-none"
               />
             </div>
             <button
               type="button"
-              className="flex h-13 items-center bg-[#ffc91f] px-7 text-sm font-bold text-black transition hover:bg-[#ffb901] cursor-pointer"
+              className="flex h-13 items-center bg-[#ffc91f] px-7 text-base font-bold text-black transition hover:bg-[#ffb901] cursor-pointer"
             >
               <Lock
                 size="14"
@@ -262,15 +264,23 @@ export default function Header() {
               {item.columns ? (
                 <button
                   type="button"
-                  className="flex items-center gap-2 px-4 py-4 text-[15px] text-[#232323] transition hover:text-[#ffb901] cursor-pointer hover:font-medium"
+                  className="flex items-center gap-2 px-4 py-4 text-base font-medium text-[#6C6C6C] transition hover:text-[#ffb901] cursor-pointer"
                 >
                   <span>{item.label}</span>
                   <ArrowDown2 size="12" color="currentColor" variant="Linear" />
                 </button>
+              ) : item.link === "/contact" ? (
+                <button
+                  type="button"
+                  onClick={() => openContactModal("contact")}
+                  className="flex items-center gap-2 px-4 py-4 text-base font-medium text-[#6C6C6C] transition hover:text-[#ffb901] cursor-pointer"
+                >
+                  <span>{item.label}</span>
+                </button>
               ) : (
                 <Link
                   href={item.link}
-                  className="flex items-center gap-2 px-4 py-4 text-[15px] text-[#232323] transition hover:text-[#ffb901] hover:font-medium"
+                  className="flex items-center gap-2 px-4 py-4 text-base font-medium text-[#6C6C6C] transition hover:text-[#ffb901]"
                 >
                   <span>{item.label}</span>
                 </Link>
@@ -365,6 +375,22 @@ export default function Header() {
                     <div className="space-y-1">
                       {mainNavItems.map((item) => {
                         if (!item.columns) {
+                          if (item.link === "/contact") {
+                            return (
+                              <button
+                                key={item.label}
+                                type="button"
+                                onClick={() => {
+                                  setIsMobileMenuOpen(false);
+                                  setOpenMobileMegaMenu(null);
+                                  openContactModal("contact");
+                                }}
+                                className="flex w-full items-center justify-between rounded-sm px-2 py-3 text-left text-[15px] font-semibold text-[#232323] transition hover:bg-black/5 hover:text-[#ffb901]"
+                              >
+                                <span>{item.label}</span>
+                              </button>
+                            );
+                          }
                           return (
                             <Link
                               key={item.label}

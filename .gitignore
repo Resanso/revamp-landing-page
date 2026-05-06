@@ -9,6 +9,7 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+generated
 
 # testing
 /coverage
@@ -42,3 +43,4 @@ next-env.d.ts
 
 .open-next
 .wrangler
+/src/generated/prisma
