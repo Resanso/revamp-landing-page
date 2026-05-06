@@ -12,7 +12,7 @@ export const topBarMainLinks = [
 export const topBarSwitches = [
   { name: "GitHub", href: "https://github.com/helloprodigi" },
   { name: "Instagram", href: "https://instagram.com/helloprodigi" },
-  { name: "LinkedIn", href: "https://linkedin.com/in/helloprodigi" },
+  { name: "LinkedIn", href: "https://www.linkedin.com/company/helloprodigi/" },
 ];
 
 export const mainNavItems = [
@@ -279,5 +279,5 @@ export const footerColumns = {
 export const socialLinks = [
   { name: "GitHub", href: "https://github.com/helloprodigi" },
   { name: "Instagram", href: "https://instagram.com/helloprodigi" },
-  { name: "LinkedIn", href: "https://linkedin.com/in/helloprodigi" },
+  { name: "LinkedIn", href: "https://www.linkedin.com/company/helloprodigi/" },
 ];
