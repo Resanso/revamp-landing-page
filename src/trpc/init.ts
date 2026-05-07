@@ -1,4 +1,5 @@
 import { initTRPC } from '@trpc/server';
+import { handlePrismaError } from '@/trpc/utils/prismaErrorHandlers';
  
 /**
  * This context creator accepts `headers` so it can be reused in both
@@ -26,4 +27,18 @@ const t = initTRPC
 // Base router and procedure helpers
 export const createTRPCRouter = t.router;
 export const createCallerFactory = t.createCallerFactory;
-export const baseProcedure = t.procedure;
+
+const prismaErrorHandlerMiddleware = t.middleware(async ({ next, path, rawInput }) => {
+  try {
+    return await next();
+  } catch (error) {
+    const entity = path.split(".")[0];
+    let id: number | undefined = undefined;
+    if (rawInput && typeof rawInput === "object" && "id" in rawInput) {
+      id = (rawInput as any).id;
+    }
+    handlePrismaError(error, { entity, id });
+  }
+});
+
+export const baseProcedure = t.procedure.use(prismaErrorHandlerMiddleware);
