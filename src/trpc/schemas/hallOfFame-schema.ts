@@ -44,7 +44,8 @@ export const getAllSchema = z
       .int()
       .min(1, "Minimal 1 item")
       .max(100, "Maksimal 100 item per halaman")
-      .default(20),
+      .default(6),
+    page: z.number().int().min(1).default(1),
     cursor: z.number().int().positive().optional(),
   })
   .optional();

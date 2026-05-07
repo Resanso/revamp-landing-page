@@ -14,6 +14,7 @@ type HallOfFamePageProps = {
   searchParams: Promise<{
     year?: string;
     q?: string;
+    page?: string;
   }>;
 };
 
@@ -34,13 +35,17 @@ export default async function HallOfFamePage({
       ? params.year
       : (availableYears[0] ?? new Date().getFullYear().toString());
 
-  // Mengambil data Hall of Fame dari database melalui tRPC
-  const entries = await queryClient.fetchQuery(
+  const page = params.page ? parseInt(params.page, 10) : 1;
+
+  const data = await queryClient.fetchQuery(
     trpc.hallOfFame.getAll.queryOptions({
       year: activeYear,
       ...(searchQuery ? { q: searchQuery } : {}),
+      page: isNaN(page) ? 1 : page,
     }),
   );
+
+  const { entries, meta } = data;
 
   return (
     <HydrateClient>
@@ -127,6 +132,32 @@ export default async function HallOfFamePage({
             Tidak ada pencapaian yang cocok dengan filter saat ini.
           </p>
         ) : null}
+
+        {meta.totalPages > 1 && (
+          <div className="mt-10 flex items-end justify-end gap-2">
+            {Array.from({ length: meta.totalPages }).map((_, i) => {
+              const p = i + 1;
+              const nextParams = new URLSearchParams();
+              if (activeYear) nextParams.set("year", activeYear);
+              if (searchQuery) nextParams.set("q", searchQuery);
+              if (p > 1) nextParams.set("page", p.toString());
+
+              return (
+                <Link
+                  key={p}
+                  href={`/hall-of-fame?${nextParams.toString()}`}
+                  className={`flex h-10 w-10 items-center justify-center rounded-sm border text-sm font-semibold transition ${
+                    p === meta.page
+                      ? "border-[#ffc91f] bg-[#ffc91f] text-black"
+                      : "border-black/15 bg-white text-black/70 hover:bg-black/5 hover:text-black"
+                  }`}
+                >
+                  {p}
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </main>
     </HydrateClient>
   );
