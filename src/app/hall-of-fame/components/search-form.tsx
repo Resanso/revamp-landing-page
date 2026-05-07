@@ -1,6 +1,7 @@
 "use client";
 import { SearchNormal1 } from "iconsax-react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState, useRef } from "react";
 
 export function SearchForm({
   activeYear,
@@ -10,12 +11,31 @@ export function SearchForm({
   defaultQuery: string;
 }) {
   const router = useRouter();
+  const [query, setQuery] = useState(defaultQuery);
+  const initialRender = useRef(true);
+
+  useEffect(() => {
+    if (initialRender.current) {
+      initialRender.current = false;
+      return;
+    }
+
+    // timeout
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams({ year: activeYear });
+      const searchQuery = query.trim();
+      if (searchQuery) params.set("q", searchQuery);
+      router.push(`/hall-of-fame?${params.toString()}`);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [query, activeYear, router]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const q = new FormData(e.currentTarget).get("q");
     const params = new URLSearchParams({ year: activeYear });
-    if (q) params.set("q", q.toString());
+    const searchQuery = query.trim();
+    if (searchQuery) params.set("q", searchQuery);
     router.push(`/hall-of-fame?${params.toString()}`);
   };
 
@@ -34,7 +54,8 @@ export function SearchForm({
       <input
         type="search"
         name="q"
-        defaultValue={defaultQuery}
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
         placeholder="Cari title atau lomba..."
         className="w-full border-0 bg-transparent px-3 text-sm outline-none"
       />

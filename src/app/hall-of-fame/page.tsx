@@ -25,17 +25,16 @@ export default async function HallOfFamePage({
   const searchQuery = (params.q ?? "").trim();
   const queryClient = getQueryClient();
 
-  // Mengambil daftar tahun yang tersedia melalui tRPC dengan fetchQuery
   const availableYears = await queryClient.fetchQuery(
     trpc.hallOfFame.getYears.queryOptions(),
   );
 
-  const activeYear =
+  const activeYear: string =
     params.year && availableYears.includes(params.year)
       ? params.year
       : (availableYears[0] ?? new Date().getFullYear().toString());
 
-  const page = params.page ? parseInt(params.page, 10) : 1;
+  const page: number = params.page ? parseInt(params.page, 10) : 1;
 
   const data = await queryClient.fetchQuery(
     trpc.hallOfFame.getAll.queryOptions({
@@ -98,7 +97,10 @@ export default async function HallOfFamePage({
           <SearchForm activeYear={activeYear} defaultQuery={searchQuery} />
         </div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div
+          key={`grid-${activeYear}-${searchQuery}-${page}`}
+          className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
+        >
           {entries.map((entry) => (
             <article
               key={entry.id}

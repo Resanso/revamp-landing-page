@@ -8,7 +8,6 @@ import {
 import prisma from "@/lib/prisma";
 import { Prisma } from "../../../generated/prisma/client";
 import { TRPCError } from "@trpc/server";
-import { handlePrismaError } from "@/trpc/utils/prismaErrorHandlers";
 
 export const hallOfFameRouter = createTRPCRouter({
   getAll: baseProcedure.input(getAllSchema).query(async ({ input }) => {
@@ -29,78 +28,62 @@ export const hallOfFameRouter = createTRPCRouter({
       ];
     }
 
-    try {
-      const [entries, total] = await Promise.all([
-        prisma.hallOfFame.findMany({
-          where: whereClause,
-          skip,
-          take: limit,
-          orderBy: {
-            id: "asc",
-          },
-        }),
-        prisma.hallOfFame.count({ where: whereClause }),
-      ]);
-
-      return {
-        entries,
-        meta: {
-          total,
-          page,
-          limit,
-          totalPages: Math.ceil(total / limit),
+    const [entries, total] = await Promise.all([
+      prisma.hallOfFame.findMany({
+        where: whereClause,
+        skip,
+        take: limit,
+        orderBy: {
+          id: "asc",
         },
-      };
-    } catch (error) {
-      handlePrismaError(error, { entity: "HallOfFame" });
-    }
+      }),
+      prisma.hallOfFame.count({ where: whereClause }),
+    ]);
+
+    return {
+      entries,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }),
 
   getYears: baseProcedure.query(async () => {
-    try {
-      const distinctYearsResult = await prisma.hallOfFame.findMany({
-        select: { year: true },
-        distinct: ["year"],
-        orderBy: { year: "desc" },
-      });
-      return distinctYearsResult.map((item) => item.year);
-    } catch (error) {
-      handlePrismaError(error, { entity: "HallOfFame" });
-    }
+    const distinctYearsResult = await prisma.hallOfFame.findMany({
+      select: { year: true },
+      distinct: ["year"],
+      orderBy: { year: "desc" },
+    });
+    return distinctYearsResult.map((item) => item.year);
   }),
 
   getById: baseProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
-      try {
-        const entry = await prisma.hallOfFame.findUnique({
-          where: { id: input.id },
+      const entry = await prisma.hallOfFame.findUnique({
+        where: { id: input.id },
+      });
+
+      if (!entry) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `data dengan id ${input.id} tidak ditemukan`,
         });
-
-        if (!entry) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: `Entry dengan id ${input.id} tidak ditemukan`,
-          });
-        }
-
-        return entry;
-      } catch (error) {
-        handlePrismaError(error, { id: input.id, entity: "HallOfFame" });
       }
+
+      return entry;
     }),
 
   create: baseProcedure
     .input(hallOfFameCreateSchema)
     .mutation(async ({ input }) => {
-      try {
-        const newEntry = await prisma.hallOfFame.create({
-          data: input,
-        });
-        return newEntry;
-      } catch (error) {
-        handlePrismaError(error, { entity: "HallOfFame" });
-      }
+      const newEntry = await prisma.hallOfFame.create({
+        data: input,
+      });
+      return newEntry;
     }),
 
   update: baseProcedure
@@ -108,27 +91,41 @@ export const hallOfFameRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const { id, ...data } = input;
 
-      try {
-        const updatedEntry = await prisma.hallOfFame.update({
-          where: { id },
-          data,
+      const existing = await prisma.hallOfFame.findUnique({
+        where: { id },
+      });
+
+      if (!existing) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `data dengan id ${id} tidak ditemukan`,
         });
-        return updatedEntry;
-      } catch (error) {
-        handlePrismaError(error, { id, entity: "HallOfFame" });
       }
+
+      const updatedEntry = await prisma.hallOfFame.update({
+        where: { id },
+        data,
+      });
+      return updatedEntry;
     }),
 
   delete: baseProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
-      try {
-        await prisma.hallOfFame.delete({
-          where: { id: input.id },
+      const existing = await prisma.hallOfFame.findUnique({
+        where: { id: input.id },
+      });
+
+      if (!existing) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: `data dengan id ${input.id} tidak ditemukan`,
         });
-        return { success: true };
-      } catch (error) {
-        handlePrismaError(error, { id: input.id, entity: "HallOfFame" });
       }
+
+      await prisma.hallOfFame.delete({
+        where: { id: input.id },
+      });
+      return { success: true };
     }),
 });
