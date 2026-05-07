@@ -44,7 +44,7 @@ model HallOfFame {
   id          Int      @id @default(autoincrement())
   year        String // E.g., "2024"
   title       String
-  competition String
+  competition String @db.Text
   image       String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
