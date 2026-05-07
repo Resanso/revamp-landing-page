@@ -1,9 +1,4 @@
-import {
-  HALL_OF_FAME_BY_YEAR,
-  HALL_OF_FAME_YEARS,
-  type HallOfFameEntry,
-  type HallOfFameYear,
-} from "@/lib/hall-of-fame";
+import { getCaller } from "@/trpc/server";
 import { ArrowRight2, SearchNormal1 } from "iconsax-react";
 
 import Image from "next/image";
@@ -21,32 +16,22 @@ type HallOfFamePageProps = {
   }>;
 };
 
-function isValidYear(year: string): year is HallOfFameYear {
-  return HALL_OF_FAME_YEARS.includes(year as HallOfFameYear);
-}
-
-function matchesQuery(entry: HallOfFameEntry, query: string): boolean {
-  if (!query) return true;
-
-  const keyword = query.toLowerCase();
-  const haystack = [entry.title, entry.competition].join(" ").toLowerCase();
-
-  return haystack.includes(keyword);
-}
-
 export default async function HallOfFamePage({
   searchParams,
 }: HallOfFamePageProps) {
   const params = await searchParams;
-  const activeYear = isValidYear(params.year ?? "")
-    ? (params.year as HallOfFameYear)
-    : HALL_OF_FAME_YEARS[0];
-  const searchQuery = (params.q ?? "").trim();
+  const caller = await getCaller();
 
-  const entries = HALL_OF_FAME_BY_YEAR[activeYear] ?? [];
-  const filteredEntries = entries.filter((entry) =>
-    matchesQuery(entry, searchQuery),
-  );
+  const years = await caller.hallOfFame.getYears();
+  const activeYear = years.includes(params.year ?? "") ? params.year! : (years[0] ?? "");
+  const searchQuery = (params.q ?? "").trim().toLowerCase();
+
+  const entries = activeYear ? await caller.hallOfFame.getByYear({ year: activeYear }) : [];
+
+  const filteredEntries = entries.filter((entry) => {
+    if (!searchQuery) return true;
+    return [entry.title, entry.competition].join(" ").toLowerCase().includes(searchQuery);
+  });
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl px-4 py-14 md:px-8">
@@ -68,14 +53,11 @@ export default async function HallOfFamePage({
 
       <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap gap-2">
-          {HALL_OF_FAME_YEARS.map((year) => {
+          {years.map((year) => {
             const isActive = activeYear === year;
             const nextParams = new URLSearchParams();
-
             nextParams.set("year", year);
-            if (searchQuery) {
-              nextParams.set("q", searchQuery);
-            }
+            if (searchQuery) nextParams.set("q", searchQuery);
 
             return (
               <Link
@@ -144,11 +126,11 @@ export default async function HallOfFamePage({
         ))}
       </div>
 
-      {filteredEntries.length === 0 ? (
+      {filteredEntries.length === 0 && (
         <p className="mt-8 text-sm text-black/60">
           Tidak ada pencapaian yang cocok dengan filter saat ini.
         </p>
-      ) : null}
+      )}
     </main>
   );
 }
