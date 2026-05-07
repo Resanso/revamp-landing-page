@@ -1,6 +1,5 @@
-import { initTRPC } from '@trpc/server';
-import { handlePrismaError } from '@/trpc/utils/prismaErrorHandlers';
- 
+import { initTRPC } from "@trpc/server";
+import { handlePrismaError } from "@/trpc/utils/prismaErrorHandlers";
 /**
  * This context creator accepts `headers` so it can be reused in both
  * the RSC server caller (where you pass `next/headers`) and the
@@ -8,9 +7,8 @@ import { handlePrismaError } from '@/trpc/utils/prismaErrorHandlers';
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   // const user = await auth(opts.headers);
-  return { userId: 'user_123' };
+  return { userId: "user_123" };
 };
- 
 // Avoid exporting the entire t-object
 // since it's not very descriptive.
 // For instance, the use of a t variable
@@ -23,22 +21,26 @@ const t = initTRPC
      */
     // transformer: superjson,
   });
- 
 // Base router and procedure helpers
 export const createTRPCRouter = t.router;
 export const createCallerFactory = t.createCallerFactory;
 
-const prismaErrorHandlerMiddleware = t.middleware(async ({ next, path, rawInput }) => {
-  try {
-    return await next();
-  } catch (error) {
-    const entity = path.split(".")[0];
-    let id: number | undefined = undefined;
-    if (rawInput && typeof rawInput === "object" && "id" in rawInput) {
-      id = (rawInput as any).id;
+const prismaErrorHandlerMiddleware = t.middleware(
+  async ({ next, path, getRawInput }) => {
+    try {
+      return await next();
+    } catch (error) {
+      const entity = path.split(".")[0];
+      let id: number | undefined = undefined;
+      try {
+        const rawInput = await getRawInput();
+        if (rawInput && typeof rawInput === "object" && "id" in rawInput) {
+          id = (rawInput as any).id;
+        }
+      } catch (inputError) {}
+      handlePrismaError(error, { entity, id });
     }
-    handlePrismaError(error, { entity, id });
-  }
-});
+  },
+);
 
 export const baseProcedure = t.procedure.use(prismaErrorHandlerMiddleware);
