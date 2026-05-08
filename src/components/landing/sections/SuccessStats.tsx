@@ -1,31 +1,25 @@
 import Image from "next/image";
 import SectionContainer from "@/components/landing/ui/SectionContainer";
-
-type StatItem = {
-  id: string;
-  label: string;
-  value: string;
-  accent: string;
-  order: number;
-};
-
-type SuccessStatsProps = {
-  stats: StatItem[];
-};
+import { successStats } from "@/data/landing-content";
 
 const accentMap: Record<string, string> = {
   black: "bg-[#353638] text-white",
   primary: "bg-[#ffc91f]",
 };
 
-export default function SuccessStats({ stats }: SuccessStatsProps) {
-  const renderStatCard = (stat: StatItem | undefined, spanClass: string) => {
-    if (!stat) return null;
+export default function SuccessStats() {
+  const renderStatCard = (
+    stat: (typeof successStats)[number] | undefined,
+    spanClass: string,
+  ) => {
+    if (!stat) {
+      return null;
+    }
 
     return (
       <article
         key={stat.label}
-        className={`card-rise rounded-sm p-6 ${spanClass} ${accentMap[stat.accent] ?? accentMap.black}`}
+        className={`card-rise rounded-sm p-6 ${spanClass} ${accentMap[stat.accent]}`}
       >
         <p className="mb-6 text-4xl font-semibold tracking-tight">
           {stat.value}
@@ -41,8 +35,8 @@ export default function SuccessStats({ stats }: SuccessStatsProps) {
         Our Success Stories
       </h2>
       <div className="grid gap-3 md:grid-cols-12">
-        {renderStatCard(stats[0], "md:col-span-2")}
-        {renderStatCard(stats[1], "md:col-span-4")}
+        {renderStatCard(successStats[0], "md:col-span-2")}
+        {renderStatCard(successStats[1], "md:col-span-4")}
 
         <article className="card-rise overflow-hidden rounded-sm md:relative md:col-span-6 md:row-span-2 md:min-h-31.25">
           <Image
@@ -64,8 +58,8 @@ export default function SuccessStats({ stats }: SuccessStatsProps) {
           />
         </article>
 
-        {renderStatCard(stats[2], "md:col-span-4")}
-        {renderStatCard(stats[3], "md:col-span-2")}
+        {renderStatCard(successStats[2], "md:col-span-4")}
+        {renderStatCard(successStats[3], "md:col-span-2")}
       </div>
     </SectionContainer>
   );

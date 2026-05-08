@@ -1,6 +1,10 @@
-import { getCaller } from "@/trpc/server";
-import { ArrowRight2 } from "iconsax-react";
-import { SearchForm } from "./components/search-form";
+import {
+  HALL_OF_FAME_BY_YEAR,
+  HALL_OF_FAME_YEARS,
+  type HallOfFameEntry,
+  type HallOfFameYear,
+} from "@/lib/hall-of-fame";
+import { ArrowRight2, SearchNormal1 } from "iconsax-react";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -14,32 +18,35 @@ type HallOfFamePageProps = {
   searchParams: Promise<{
     year?: string;
     q?: string;
-    page?: string;
   }>;
 };
+
+function isValidYear(year: string): year is HallOfFameYear {
+  return HALL_OF_FAME_YEARS.includes(year as HallOfFameYear);
+}
+
+function matchesQuery(entry: HallOfFameEntry, query: string): boolean {
+  if (!query) return true;
+
+  const keyword = query.toLowerCase();
+  const haystack = [entry.title, entry.competition].join(" ").toLowerCase();
+
+  return haystack.includes(keyword);
+}
 
 export default async function HallOfFamePage({
   searchParams,
 }: HallOfFamePageProps) {
   const params = await searchParams;
-  const caller = await getCaller();
+  const activeYear = isValidYear(params.year ?? "")
+    ? (params.year as HallOfFameYear)
+    : HALL_OF_FAME_YEARS[0];
+  const searchQuery = (params.q ?? "").trim();
 
-  const years = await caller.hallOfFame.getYears();
-  const activeYear = years.includes(params.year ?? "")
-    ? params.year!
-    : (years[0] ?? "");
-  const searchQuery = (params.q ?? "").trim().toLowerCase();
-
-  const page = params.page ? parseInt(params.page, 10) : 1;
-
-  const data = await caller.hallOfFame.getAll({
-    year: activeYear,
-    ...(searchQuery ? { q: searchQuery } : {}),
-    page: isNaN(page) ? 1 : page,
-    limit: 6,
-  });
-
-  const { entries, meta } = data;
+  const entries = HALL_OF_FAME_BY_YEAR[activeYear] ?? [];
+  const filteredEntries = entries.filter((entry) =>
+    matchesQuery(entry, searchQuery),
+  );
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl px-4 py-14 md:px-8">
@@ -61,11 +68,14 @@ export default async function HallOfFamePage({
 
       <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap gap-2">
-          {years.map((year) => {
+          {HALL_OF_FAME_YEARS.map((year) => {
             const isActive = activeYear === year;
             const nextParams = new URLSearchParams();
+
             nextParams.set("year", year);
-            if (searchQuery) nextParams.set("q", searchQuery);
+            if (searchQuery) {
+              nextParams.set("q", searchQuery);
+            }
 
             return (
               <Link
@@ -83,14 +93,30 @@ export default async function HallOfFamePage({
           })}
         </div>
 
-        <SearchForm activeYear={activeYear} defaultQuery={searchQuery} />
+        <form
+          action="/hall-of-fame"
+          method="get"
+          className="flex w-full max-w-sm items-center border border-black/15 bg-white px-3 py-2"
+        >
+          <input type="hidden" name="year" value={activeYear} />
+          <SearchNormal1
+            size="16"
+            color="currentColor"
+            variant="Linear"
+            className="text-black/50"
+          />
+          <input
+            type="search"
+            name="q"
+            defaultValue={searchQuery}
+            placeholder="Cari title atau lomba..."
+            className="w-full border-0 bg-transparent px-3 text-sm outline-none"
+          />
+        </form>
       </div>
 
-      <div
-        key={`grid-${activeYear}-${searchQuery}-${page}`}
-        className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
-      >
-        {entries.map((entry) => (
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {filteredEntries.map((entry) => (
           <article
             key={entry.id}
             className="group overflow-hidden rounded-sm border border-black/10 bg-white transition duration-300 hover:-translate-y-1 hover:border-[#ffc91f]/80 hover:shadow-[0_14px_36px_rgba(10,20,40,0.12)]"
@@ -118,37 +144,11 @@ export default async function HallOfFamePage({
         ))}
       </div>
 
-      {entries.length === 0 && (
+      {filteredEntries.length === 0 ? (
         <p className="mt-8 text-sm text-black/60">
           Tidak ada pencapaian yang cocok dengan filter saat ini.
         </p>
-      )}
-
-      {meta.totalPages > 1 && (
-        <div className="mt-10 flex items-end justify-end gap-2">
-          {Array.from({ length: meta.totalPages }).map((_, i) => {
-            const p = i + 1;
-            const nextParams = new URLSearchParams();
-            if (activeYear) nextParams.set("year", activeYear);
-            if (searchQuery) nextParams.set("q", searchQuery);
-            if (p > 1) nextParams.set("page", p.toString());
-
-            return (
-              <Link
-                key={p}
-                href={`/hall-of-fame?${nextParams.toString()}`}
-                className={`flex h-10 w-10 items-center justify-center rounded-sm border text-sm font-semibold transition ${
-                  p === meta.page
-                    ? "border-[#ffc91f] bg-[#ffc91f] text-black"
-                    : "border-black/15 bg-white text-black/70 hover:bg-black/5 hover:text-black"
-                }`}
-              >
-                {p}
-              </Link>
-            );
-          })}
-        </div>
-      )}
+      ) : null}
     </main>
   );
 }

@@ -1,5 +1,4 @@
-import { ACTIVITY_CATEGORIES } from "@/lib/activity-types";
-import { getCaller } from "@/trpc/server";
+import { ACTIVITY_CATEGORIES, getAllActivitiesMeta } from "@/lib/activities";
 import { ArrowRight2, SearchNormal1 } from "iconsax-react";
 
 import Image from "next/image";
@@ -24,36 +23,55 @@ export default async function ActivitiesPage({
   searchParams,
 }: ActivitiesPageProps) {
   const params = await searchParams;
-
+  const posts = getAllActivitiesMeta();
   const activeCategory = ACTIVITY_CATEGORIES.includes(
     params.category as (typeof ACTIVITY_CATEGORIES)[number],
   )
     ? (params.category as (typeof ACTIVITY_CATEGORIES)[number])
-    : undefined;
+    : "All";
 
-  const searchQuery = (params.q ?? "").trim();
+  const searchQuery = (params.q ?? "").trim().toLowerCase();
+
+  const filteredPosts = posts.filter((post) => {
+    const categoryMatch =
+      activeCategory === "All" ? true : post.category === activeCategory;
+    const textMatch = searchQuery
+      ? `${post.title} ${post.excerpt}`.toLowerCase().includes(searchQuery)
+      : true;
+
+    return categoryMatch && textMatch;
+  });
+
   const requestedPage = Number(params.page ?? "1");
-  const currentPage =
+  const normalizedPage =
     Number.isFinite(requestedPage) && requestedPage > 0
       ? Math.floor(requestedPage)
       : 1;
-
-  const caller = await getCaller();
-  const { posts, totalCount } = await caller.activities.getAll({
-    category: activeCategory,
-    q: searchQuery || undefined,
-    page: currentPage,
-    limit: ITEMS_PER_PAGE,
-  });
-
-  const totalPages = Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE));
-  const safePage = Math.min(currentPage, totalPages);
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredPosts.length / ITEMS_PER_PAGE),
+  );
+  const currentPage = Math.min(normalizedPage, totalPages);
+  const paginatedPosts = filteredPosts.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
 
   const buildPageHref = (page: number) => {
     const nextParams = new URLSearchParams();
-    if (activeCategory) nextParams.set("category", activeCategory);
-    if (params.q) nextParams.set("q", params.q);
-    if (page > 1) nextParams.set("page", String(page));
+
+    if (activeCategory !== "All") {
+      nextParams.set("category", activeCategory);
+    }
+
+    if (params.q) {
+      nextParams.set("q", params.q);
+    }
+
+    if (page > 1) {
+      nextParams.set("page", String(page));
+    }
+
     return `/activities${nextParams.toString() ? `?${nextParams.toString()}` : ""}`;
   };
 
@@ -76,11 +94,14 @@ export default async function ActivitiesPage({
       <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap gap-2">
           {categoryTabs.map((category) => {
-            const isAll = category === "All";
-            const isActive = isAll ? !activeCategory : activeCategory === category;
+            const isActive = activeCategory === category;
             const nextParams = new URLSearchParams();
-            if (!isAll) nextParams.set("category", category);
-            if (params.q) nextParams.set("q", params.q);
+            if (category !== "All") {
+              nextParams.set("category", category);
+            }
+            if (params.q) {
+              nextParams.set("q", params.q);
+            }
 
             return (
               <Link
@@ -103,9 +124,9 @@ export default async function ActivitiesPage({
           method="get"
           className="flex w-full max-w-sm items-center border border-black/15 bg-white px-3 py-2"
         >
-          {activeCategory && (
+          {activeCategory !== "All" ? (
             <input type="hidden" name="category" value={activeCategory} />
-          )}
+          ) : null}
           <SearchNormal1
             size="16"
             color="currentColor"
@@ -123,7 +144,7 @@ export default async function ActivitiesPage({
       </div>
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-        {posts.map((post) => (
+        {paginatedPosts.map((post) => (
           <article
             key={post.slug}
             className="overflow-hidden rounded-sm border border-black/10 bg-white"
@@ -154,19 +175,19 @@ export default async function ActivitiesPage({
         ))}
       </div>
 
-      {totalCount === 0 && (
+      {filteredPosts.length === 0 ? (
         <p className="mt-8 text-sm text-black/60">
           No activities found for current filter.
         </p>
-      )}
+      ) : null}
 
-      {totalCount > 0 && totalPages > 1 && (
+      {filteredPosts.length > 0 && totalPages > 1 ? (
         <nav className="mt-10 flex flex-wrap items-center justify-center gap-2">
           <Link
-            href={buildPageHref(Math.max(1, safePage - 1))}
-            aria-disabled={safePage === 1}
+            href={buildPageHref(Math.max(1, currentPage - 1))}
+            aria-disabled={currentPage === 1}
             className={`rounded-sm border px-3 py-2 text-sm font-semibold transition ${
-              safePage === 1
+              currentPage === 1
                 ? "pointer-events-none border-black/10 text-black/30"
                 : "border-black/15 text-black/70 hover:text-black"
             }`}
@@ -174,25 +195,30 @@ export default async function ActivitiesPage({
             Prev
           </Link>
 
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <Link
-              key={page}
-              href={buildPageHref(page)}
-              className={`rounded-sm border px-3 py-2 text-sm font-semibold transition ${
-                page === safePage
-                  ? "border-[#ffc91f] bg-[#ffc91f] text-black"
-                  : "border-black/15 text-black/70 hover:text-black"
-              }`}
-            >
-              {page}
-            </Link>
-          ))}
+          {Array.from({ length: totalPages }, (_, index) => {
+            const page = index + 1;
+            const isActive = page === currentPage;
+
+            return (
+              <Link
+                key={page}
+                href={buildPageHref(page)}
+                className={`rounded-sm border px-3 py-2 text-sm font-semibold transition ${
+                  isActive
+                    ? "border-[#ffc91f] bg-[#ffc91f] text-black"
+                    : "border-black/15 text-black/70 hover:text-black"
+                }`}
+              >
+                {page}
+              </Link>
+            );
+          })}
 
           <Link
-            href={buildPageHref(Math.min(totalPages, safePage + 1))}
-            aria-disabled={safePage === totalPages}
+            href={buildPageHref(Math.min(totalPages, currentPage + 1))}
+            aria-disabled={currentPage === totalPages}
             className={`rounded-sm border px-3 py-2 text-sm font-semibold transition ${
-              safePage === totalPages
+              currentPage === totalPages
                 ? "pointer-events-none border-black/10 text-black/30"
                 : "border-black/15 text-black/70 hover:text-black"
             }`}
@@ -200,7 +226,7 @@ export default async function ActivitiesPage({
             Next
           </Link>
         </nav>
-      )}
+      ) : null}
     </main>
   );
 }

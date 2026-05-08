@@ -1,12 +1,13 @@
-import { ACTIVITY_CATEGORIES } from "@/lib/activity-types";
-import { getCaller } from "@/trpc/server";
+import {
+  ACTIVITY_CATEGORIES,
+  getLatestActivitiesByCategory,
+} from "@/lib/activities";
 
 import SectionContainer from "@/components/landing/ui/SectionContainer";
-import UpdatesClient from "@/components/landing/sections/updates/updates-client";
+import UpdatesClient from "@/components/landing/sections/updates/UpdatesClient";
 
-export default async function Updates() {
-  const caller = await getCaller();
-  const postsByCategory = await caller.activities.getLatestByCategory({ limit: 3 });
+export default function Updates() {
+  const postsByCategory = getLatestActivitiesByCategory(3);
 
   return (
     <section className="relative overflow-hidden bg-[#000000] py-16 text-white md:py-20">
