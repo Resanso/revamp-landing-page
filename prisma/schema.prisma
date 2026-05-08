@@ -44,7 +44,7 @@ model HallOfFame {
   id          Int      @id @default(autoincrement())
   year        String // E.g., "2024"
   title       String
-  competition String @db.Text
+  competition String
   image       String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -68,33 +68,4 @@ model AdmissionResult {
   isPassed  Boolean  @map("lolos")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-model HeroSlide {
-  id        String   @id @default(uuid())
-  src       String
-  alt       String
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model SuccessStat {
-  id        String   @id @default(uuid())
-  label     String
-  value     String
-  accent    String   @default("black")
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Department {
-  id          String   @id @default(uuid())
-  title       String
-  description String
-  img         String
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 }

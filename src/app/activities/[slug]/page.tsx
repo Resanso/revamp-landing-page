@@ -1,4 +1,5 @@
-import { getCaller } from "@/trpc/server";
+import { getActivityPostBySlug, getAllActivitiesMeta } from "@/lib/activities";
+
 import { ArrowRight2 } from "iconsax-react";
 import FloatingShare from "@/components/activities/FloatingShare";
 import Image from "next/image";
@@ -9,12 +10,17 @@ type ActivityDetailPageProps = {
   params: Promise<{ slug: string }>;
 };
 
+export async function generateStaticParams() {
+  return getAllActivitiesMeta().map((post) => ({ slug: post.slug }));
+}
+
 export async function generateMetadata({ params }: ActivityDetailPageProps) {
   const { slug } = await params;
-  const caller = await getCaller();
-  const post = await caller.activities.getBySlug({ slug });
+  const post = await getActivityPostBySlug(slug);
 
-  if (!post) return { title: "Activity Not Found" };
+  if (!post) {
+    return { title: "Activity Not Found" };
+  }
 
   return {
     title: `${post.title} | Activities`,
@@ -26,10 +32,11 @@ export default async function ActivityDetailPage({
   params,
 }: ActivityDetailPageProps) {
   const { slug } = await params;
-  const caller = await getCaller();
-  const post = await caller.activities.getBySlug({ slug });
+  const post = await getActivityPostBySlug(slug);
 
-  if (!post) notFound();
+  if (!post) {
+    notFound();
+  }
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl px-4 py-14 md:px-8">
