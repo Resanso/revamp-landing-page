@@ -1,6 +1,6 @@
 "use client";
 
-import type { ActivityCategory, ActivityMeta } from "@/lib/activities";
+import type { ActivityCategory, ActivityMeta } from "@/lib/activity-types";
 import { ArrowRight2, Calendar1 } from "iconsax-react";
 import { useMemo, useState } from "react";
 
