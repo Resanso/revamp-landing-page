@@ -4,14 +4,23 @@ import { useState } from "react";
 import { ArrowRight2 } from "iconsax-react";
 import Image from "next/image";
 import SectionContainer from "@/components/landing/ui/SectionContainer";
-import { departements } from "@/data/landing-content";
-import DepartementCard from "@/components/landing/ui/DepartementCard";
+import DepartementCard from "@/components/landing/ui/departement-card";
 
-export default function Departements() {
-  const [activeDeptId, setActiveDeptId] = useState<number | string | null>(
-    null,
-  );
-  const activeDepartment = departements.find((d) => d.id === activeDeptId);
+type DepartmentItem = {
+  id: string;
+  title: string;
+  description: string;
+  img: string;
+  order: number;
+};
+
+type DepartementsProps = {
+  departments: DepartmentItem[];
+};
+
+export default function Departements({ departments }: DepartementsProps) {
+  const [activeDeptId, setActiveDeptId] = useState<string | null>(null);
+  const activeDepartment = departments.find((d) => d.id === activeDeptId);
 
   return (
     <section className="relative overflow-hidden py-16">
@@ -38,7 +47,7 @@ export default function Departements() {
             develop skilled talents.
           </p>
           <div className="divide-y divide-white/20 border border-white/20 bg-white/5 text-white">
-            {departements.map((item) => {
+            {departments.map((item) => {
               const isActive = item.id === activeDeptId;
 
               return (
