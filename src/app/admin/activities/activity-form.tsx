@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useTRPC } from "@/trpc/client";
 import { useMutation } from "@tanstack/react-query";
+import { X, Camera, RefreshCw, Trash2, ChevronDown } from "lucide-react";
 import { ACTIVITY_CATEGORIES } from "@/lib/activity-types";
 import { createClient } from "@/lib/supabase/client";
 import type { ActivityCategory } from "@/lib/activity-types";
@@ -16,6 +18,7 @@ type ActivityFormProps = {
     category: ActivityCategory;
     coverImage: string;
     contentMarkdown: string;
+    date: string;
   };
 };
 
@@ -25,32 +28,27 @@ export default function ActivityForm({ initial }: ActivityFormProps) {
 
   const [title, setTitle] = useState(initial?.title ?? "");
   const [excerpt, setExcerpt] = useState(initial?.excerpt ?? "");
-  const [category, setCategory] = useState<ActivityCategory>(
-    initial?.category ?? "Event",
-  );
+  const [category, setCategory] = useState<ActivityCategory>(initial?.category ?? "Event");
   const [coverImage, setCoverImage] = useState(initial?.coverImage ?? "");
-  const [contentMarkdown, setContentMarkdown] = useState(
-    initial?.contentMarkdown ?? "",
-  );
+  const [contentMarkdown, setContentMarkdown] = useState(initial?.contentMarkdown ?? "");
   const [uploading, setUploading] = useState(false);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createMutation = useMutation(
-    trpc.activities.create.mutationOptions({
-      onSuccess: () => router.push("/admin/activities"),
-    }),
-  );
+  const displayDate = initial?.date
+    ? new Date(initial.date).toLocaleDateString("id-ID", { day: "2-digit", month: "2-digit", year: "numeric" })
+    : new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "2-digit", year: "numeric" });
 
+  const createMutation = useMutation(
+    trpc.activities.create.mutationOptions({ onSuccess: () => router.push("/admin/activities") }),
+  );
   const updateMutation = useMutation(
-    trpc.activities.update.mutationOptions({
-      onSuccess: () => router.push("/admin/activities"),
-    }),
+    trpc.activities.update.mutationOptions({ onSuccess: () => router.push("/admin/activities") }),
   );
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setUploading(true);
     try {
       const supabase = createClient();
@@ -58,27 +56,21 @@ export default function ActivityForm({ initial }: ActivityFormProps) {
       const { data, error: uploadError } = await supabase.storage
         .from("activity-covers")
         .upload(path, file, { upsert: true });
-
       if (uploadError || !data) throw uploadError;
-
-      const { data: urlData } = supabase.storage
-        .from("activity-covers")
-        .getPublicUrl(data.path);
-
+      const { data: urlData } = supabase.storage.from("activity-covers").getPublicUrl(data.path);
       setCoverImage(urlData.publicUrl);
     } catch {
       setError("Gagal upload gambar. Coba lagi.");
     } finally {
       setUploading(false);
+      e.target.value = "";
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
     const payload = { title, excerpt, category, coverImage, contentMarkdown };
-
     try {
       if (initial) {
         await updateMutation.mutateAsync({ id: initial.id, ...payload });
@@ -93,93 +85,172 @@ export default function ActivityForm({ initial }: ActivityFormProps) {
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl space-y-5">
-      {error && (
-        <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-600">
-          {error}
-        </p>
-      )}
+    <div className="bg-white rounded-[8px] border border-[#D9D9D9] w-full max-w-[550px]">
+      <div className="p-6 flex flex-col gap-6">
+        {/* Header */}
+        <div className="flex flex-col items-end">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="p-1 hover:bg-black/5 rounded transition-colors"
+          >
+            <X className="w-6 h-6 text-black" />
+          </button>
+          <h2 className="text-black text-2xl font-bold font-jakarta leading-[35px] w-full">
+            {initial ? "Edit Activities" : "Add new Activities"}
+          </h2>
+        </div>
 
-      <div>
-        <label className="mb-1 block text-sm font-medium">Judul</label>
-        <input
-          type="text"
-          required
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="w-full border border-black/20 px-3 py-2 text-sm outline-none focus:border-[#ffc91f]"
-        />
-      </div>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+          {/* Image Section */}
+          {initial ? (
+            /* Edit: show preview with refresh/delete */
+            <div className="flex flex-col gap-2">
+              <p className="text-black text-sm font-normal font-jakarta">Preview Current</p>
+              <div className="relative h-[200px] rounded-[8px] overflow-hidden bg-gray-100">
+                {coverImage ? (
+                  <Image src={coverImage} alt="Preview" fill className="object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-sm text-black/40 font-jakarta">
+                    No Image
+                  </div>
+                )}
+                <div className="absolute top-4 right-4 flex gap-2">
+                  <label className="p-2 bg-[#F9FAFB] rounded flex items-center justify-center hover:bg-gray-100 transition-colors cursor-pointer">
+                    <RefreshCw className="w-5 h-5 text-[#A7A7A7]" />
+                    <input type="file" accept="image/jpeg,image/png" onChange={handleImageUpload} className="hidden" />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setCoverImage("")}
+                    className="p-2 bg-[#F9FAFB] rounded flex items-center justify-center hover:bg-gray-100 transition-colors"
+                  >
+                    <Trash2 className="w-5 h-5 text-[#F75F5F]" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* Add: drag & drop upload */
+            <div className="flex flex-col gap-2">
+              <p className="text-black text-sm font-normal font-jakarta">Upload Activities Photo</p>
+              <label className="cursor-pointer block">
+                {coverImage ? (
+                  <div className="relative w-full h-[200px] rounded-[8px] overflow-hidden border border-[#D9D9D9]">
+                    <Image src={coverImage} alt="Preview" fill className="object-cover" />
+                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                      <span className="text-white text-sm font-jakarta font-medium">Change photo</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-full border-2 border-dashed border-[#D9D9D9] rounded-[8px] py-8 flex flex-col items-center gap-3 hover:bg-gray-50 transition-colors">
+                    <div className="w-20 h-20 bg-[rgba(255,201,23,0.15)] rounded-full flex items-center justify-center">
+                      <Camera className="w-8 h-8 text-[#FFC917]" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[#231918] font-bold text-lg font-jakarta">Drag &amp; drop image here</p>
+                      <p className="text-[rgba(86,66,64,0.7)] text-sm font-jakarta mt-1">Supported only JPG and PNG</p>
+                    </div>
+                  </div>
+                )}
+                <input type="file" accept="image/jpeg,image/png" onChange={handleImageUpload} className="hidden" />
+              </label>
+              {uploading && <p className="text-xs text-black/50 font-jakarta">Uploading...</p>}
+            </div>
+          )}
 
-      <div>
-        <label className="mb-1 block text-sm font-medium">Deskripsi Singkat</label>
-        <textarea
-          required
-          rows={2}
-          value={excerpt}
-          onChange={(e) => setExcerpt(e.target.value)}
-          className="w-full border border-black/20 px-3 py-2 text-sm outline-none focus:border-[#ffc91f]"
-        />
-      </div>
+          {/* Activities Title */}
+          <div className="flex flex-col gap-2">
+            <label className="text-black text-sm font-normal font-jakarta">Activities Title</label>
+            <input
+              type="text"
+              required
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. PRODIGI Awarded Best Laboratory at Telkom University"
+              className="w-full border border-[#D9D9D9] rounded-[4px] px-4 py-[18px] text-base font-medium font-jakarta text-[#050816] placeholder:text-[#897b7a] outline-none focus:border-[#FFC917]"
+            />
+          </div>
 
-      <div>
-        <label className="mb-1 block text-sm font-medium">Kategori</label>
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value as ActivityCategory)}
-          className="w-full border border-black/20 px-3 py-2 text-sm outline-none focus:border-[#ffc91f]"
-        >
-          {ACTIVITY_CATEGORIES.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
-      </div>
+          {/* Category + Date */}
+          <div className="flex gap-6 items-start">
+            {/* Category dropdown */}
+            <div className="flex flex-col gap-2 flex-1">
+              <label className="text-black text-sm font-normal font-jakarta">Category</label>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowCategoryDropdown((v) => !v)}
+                  className="w-full border border-[#D9D9D9] rounded-[4px] px-4 py-[18px] flex items-center justify-between text-base font-medium font-jakarta text-[#050816] bg-white"
+                >
+                  <span>{category || "Select Category"}</span>
+                  <ChevronDown className={`w-5 h-5 text-[#6A6A6A] transition-transform ${showCategoryDropdown ? "rotate-180" : ""}`} />
+                </button>
+                {showCategoryDropdown && (
+                  <div className="absolute top-full left-0 right-0 z-10 bg-white border border-[#D9D9D9] rounded-[8px] overflow-hidden shadow-sm mt-1">
+                    {ACTIVITY_CATEGORIES.map((cat) => (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => { setCategory(cat); setShowCategoryDropdown(false); }}
+                        className="w-full px-4 py-[18px] text-left text-base font-medium font-jakarta text-[#897b7a] hover:bg-gray-50 transition-colors"
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
 
-      <div>
-        <label className="mb-1 block text-sm font-medium">Cover Image</label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleImageUpload}
-          className="text-sm"
-        />
-        {uploading && <p className="mt-1 text-xs text-black/50">Mengupload...</p>}
-        {coverImage && (
-          <p className="mt-1 truncate text-xs text-black/50">{coverImage}</p>
-        )}
-      </div>
+            {/* Publish Date */}
+            <div className="flex flex-col gap-2 flex-1">
+              <label className="text-black text-sm font-normal font-jakarta">Publish Date</label>
+              <div className="border border-[#D9D9D9] rounded-[4px] px-4 py-[18px] text-base font-medium font-jakarta text-[#050816]">
+                {displayDate}
+              </div>
+            </div>
+          </div>
 
-      <div>
-        <label className="mb-1 block text-sm font-medium">
-          Konten (Markdown)
-        </label>
-        <textarea
-          rows={12}
-          value={contentMarkdown}
-          onChange={(e) => setContentMarkdown(e.target.value)}
-          className="w-full border border-black/20 px-3 py-2 font-mono text-sm outline-none focus:border-[#ffc91f]"
-          placeholder="Tulis konten dalam format Markdown..."
-        />
-      </div>
+          {/* Description */}
+          <div className="flex flex-col gap-2">
+            <label className="text-black text-sm font-normal font-jakarta">Description</label>
+            <textarea
+              required
+              rows={4}
+              value={excerpt}
+              onChange={(e) => setExcerpt(e.target.value)}
+              placeholder="e.g. PRODIGI received recognition as the best laboratory at Telkom University..."
+              className="w-full border border-[#D9D9D9] rounded-[4px] px-4 py-[18px] text-base font-medium font-jakarta text-[#050816] placeholder:text-[#897b7a] outline-none focus:border-[#FFC917] resize-none"
+            />
+          </div>
 
-      <div className="flex gap-3">
-        <button
-          type="submit"
-          disabled={isPending || uploading}
-          className="bg-[#ffc91f] px-6 py-2 text-sm font-semibold text-black transition hover:bg-[#ffb901] disabled:opacity-60"
-        >
-          {isPending ? "Menyimpan..." : initial ? "Simpan Perubahan" : "Buat Aktivitas"}
-        </button>
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="border border-black/20 px-6 py-2 text-sm font-medium transition hover:bg-black/5"
-        >
-          Batal
-        </button>
+          {/* Content (Markdown) */}
+          <div className="flex flex-col gap-2">
+            <label className="text-black text-sm font-normal font-jakarta">Content (Markdown)</label>
+            <textarea
+              rows={8}
+              value={contentMarkdown}
+              onChange={(e) => setContentMarkdown(e.target.value)}
+              placeholder="Tulis konten lengkap dalam format Markdown..."
+              className="w-full border border-[#D9D9D9] rounded-[4px] px-4 py-[18px] text-sm font-mono text-[#050816] placeholder:text-[#897b7a] outline-none focus:border-[#FFC917] resize-none"
+            />
+          </div>
+
+          {error && (
+            <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-jakarta text-red-600">{error}</p>
+          )}
+
+          {/* Save button */}
+          <button
+            type="submit"
+            disabled={isPending || uploading}
+            className="w-full bg-[#FFC917] hover:bg-[#ffb901] py-6 rounded-[8px] text-base font-bold font-jakarta text-black transition-colors disabled:opacity-60"
+          >
+            {isPending ? "Menyimpan..." : "Save"}
+          </button>
+        </form>
       </div>
-    </form>
+    </div>
   );
 }

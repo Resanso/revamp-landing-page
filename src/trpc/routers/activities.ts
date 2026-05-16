@@ -131,6 +131,18 @@ export const activitiesRouter = createTRPCRouter({
       return result;
     }),
 
+  getById: baseProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      const post = await prisma.activity.findUnique({ where: { id: input.id } });
+      if (!post) return null;
+      return {
+        ...post,
+        date: post.date.toISOString(),
+        category: post.category as ActivityCategory,
+      };
+    }),
+
   create: adminProcedure
     .input(
       z.object({
