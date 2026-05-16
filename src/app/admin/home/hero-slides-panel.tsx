@@ -4,8 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTRPC } from "@/trpc/client";
 import { useMutation } from "@tanstack/react-query";
+import { Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
+import { AdminConfirmModal } from "@/components/admin/ui/admin-confirm-modal";
 
 type Slide = { id: string; src: string; alt: string; order: number };
 
@@ -13,12 +15,11 @@ export default function HeroSlidesPanel({ slides }: { slides: Slide[] }) {
   const router = useRouter();
   const trpc = useTRPC();
 
-  const [src, setSrc] = useState("");
-  const [alt, setAlt] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Slide | null>(null);
 
   const upsertMutation = useMutation(
-    trpc.home.upsertHeroSlide.mutationOptions({ onSuccess: () => { setSrc(""); setAlt(""); router.refresh(); } }),
+    trpc.home.upsertHeroSlide.mutationOptions({ onSuccess: () => router.refresh() }),
   );
   const deleteMutation = useMutation(
     trpc.home.deleteHeroSlide.mutationOptions({ onSuccess: () => router.refresh() }),
@@ -34,56 +35,60 @@ export default function HeroSlidesPanel({ slides }: { slides: Slide[] }) {
       const { data, error } = await supabase.storage.from("hero-slides").upload(path, file, { upsert: true });
       if (error || !data) throw error;
       const { data: urlData } = supabase.storage.from("hero-slides").getPublicUrl(data.path);
-      setSrc(urlData.publicUrl);
+      await upsertMutation.mutateAsync({ src: urlData.publicUrl, alt: file.name, order: slides.length });
     } finally {
       setUploading(false);
+      e.target.value = "";
     }
   };
 
-  const handleAdd = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await upsertMutation.mutateAsync({ src, alt, order: slides.length });
-  };
-
   return (
-    <div className="space-y-4">
-      <h2 className="font-semibold text-[#1a1a1a]">Hero Slides</h2>
+    <div className="bg-white rounded-lg border border-[#D9D9D9] p-8 flex flex-col gap-6">
+      <h2 className="text-black text-2xl font-semibold leading-[35px] font-jakarta break-words">Background Hero</h2>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {slides.map((slide) => (
-          <div key={slide.id} className="border border-black/10 bg-white">
-            <div className="relative aspect-video">
-              <Image src={slide.src} alt={slide.alt} fill className="object-cover" />
+      <div className="flex flex-row items-center gap-4 overflow-x-auto pb-4">
+        <label className="flex-shrink-0 cursor-pointer">
+          <div className="flex flex-col items-center justify-center gap-4 px-[108px] py-10 rounded-lg border border-[#FFC917] border-dashed">
+            <div className="w-[84px] h-[84px] bg-[rgba(255,201,23,0.15)] rounded-full flex items-center justify-center relative overflow-hidden">
+                   <Plus className="w-8 h-8 text-[#FFC917]" />
             </div>
-            <div className="flex items-center justify-between p-2">
-              <p className="text-xs text-black/50">Order: {slide.order}</p>
+            <span className="text-[#231918] text-base font-medium font-jakarta text-center">Add Photo</span>
+          </div>
+          <input type="file" accept="image/*" onChange={handleUpload} className="hidden" />
+        </label>
+        
+        <div className="flex flex-row gap-4">
+          {slides.map((slide) => (
+            <div key={slide.id} className="relative w-[300px] h-[200px] rounded-lg overflow-hidden flex-shrink-0 border border-black/10">
+              <Image src={slide.src} alt={slide.alt} fill className="object-cover" />
               <button
                 type="button"
-                onClick={() => { if (confirm("Hapus slide ini?")) deleteMutation.mutate({ id: slide.id }); }}
-                className="text-xs text-red-600 hover:underline"
+                onClick={() => setDeleteTarget(slide)}
+                className="absolute top-3 right-3 p-2 bg-[#F9FAFB] hover:bg-gray-100 transition-colors rounded flex items-center justify-center"
               >
-                Hapus
+                <Trash2 className="w-4 h-4 text-[#F75F5F]" />
               </button>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
+      
+      {uploading && <p className="text-xs text-black/50 font-jakarta">Uploading...</p>}
 
-      <form onSubmit={handleAdd} className="flex flex-wrap items-end gap-3 border border-dashed border-black/20 p-4">
-        <div>
-          <label className="mb-1 block text-xs font-medium">Upload Foto Baru</label>
-          <input type="file" accept="image/*" onChange={handleUpload} className="text-sm" />
-          {uploading && <p className="text-xs text-black/50">Uploading...</p>}
-          {src && <p className="mt-1 truncate text-xs text-black/40">{src}</p>}
-        </div>
-        <div>
-          <label className="mb-1 block text-xs font-medium">Alt Text</label>
-          <input type="text" value={alt} onChange={(e) => setAlt(e.target.value)} required className="border border-black/20 px-2 py-1.5 text-sm outline-none" />
-        </div>
-        <button type="submit" disabled={!src || upsertMutation.isPending || uploading} className="bg-[#ffc91f] px-4 py-1.5 text-sm font-semibold text-black disabled:opacity-60">
-          Tambah Slide
-        </button>
-      </form>
+      <AdminConfirmModal
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Hapus Slide"
+        description="Apakah Anda yakin ingin menghapus slide ini? Tindakan ini tidak dapat dibatalkan."
+        confirmText="Ya, Hapus"
+        cancelText="Batal"
+        onConfirm={() => {
+          if (deleteTarget) {
+            deleteMutation.mutate({ id: deleteTarget.id });
+            setDeleteTarget(null);
+          }
+        }}
+      />
     </div>
   );
 }

@@ -15,8 +15,12 @@ export default async function HallOfFameAdminPage() {
   );
 
   return (
-    <div>
-      <h1 className="mb-6 text-2xl font-bold text-[#1a1a1a]">Hall of Fame</h1>
+    <div className="space-y-10 pb-20">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-black text-5xl font-bold leading-tight font-jakarta break-words">Manage Hall of Fame</h1>
+        <p className="text-black text-sm font-normal leading-tight font-jakarta break-words">Manage yearly achievements and showcase accomplishment cards</p>
+      </div>
+
       <HofPanel years={years} entriesByYear={entriesByYear} />
     </div>
   );

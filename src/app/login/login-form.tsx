@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { CreditCard, Lock, Eye, EyeOff } from "lucide-react";
 
 export default function LoginForm() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [nim, setNim] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -18,12 +20,12 @@ export default function LoginForm() {
 
     const supabase = createClient();
     const { error: authError } = await supabase.auth.signInWithPassword({
-      email,
+      email: nim,
       password,
     });
 
     if (authError) {
-      setError("Email atau password salah. Silakan coba lagi.");
+      setError("NIM atau password salah. Silakan coba lagi.");
       setLoading(false);
       return;
     }
@@ -33,55 +35,65 @@ export default function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label
-          htmlFor="email"
-          className="mb-1 block text-sm font-medium text-[#1a1a1a]"
-        >
-          Email
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+      {/* NIM Field */}
+      <div className="flex flex-col gap-2">
+        <label className="text-[#3e484f] text-sm font-medium font-jakarta">
+          NIM
         </label>
-        <input
-          id="email"
-          type="email"
-          autoComplete="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full border border-black/20 px-3 py-2.5 text-sm outline-none focus:border-[#ffc91f] focus:ring-1 focus:ring-[#ffc91f]"
-          placeholder="admin@prodigi.ac.id"
-        />
+        <div className="relative">
+          <div className="absolute left-0 top-0 bottom-0 flex items-center pl-4 pointer-events-none">
+            <CreditCard className="w-5 h-5 text-[#6e7980]" />
+          </div>
+          <input
+            type="text"
+            required
+            value={nim}
+            onChange={(e) => setNim(e.target.value)}
+            placeholder="103012001212"
+            className="w-full bg-[#f6f6f6] rounded-[8px] pl-11 pr-4 py-4 text-base font-jakarta text-[#191c1e] placeholder:text-[rgba(110,121,128,0.6)] outline-none focus:ring-2 focus:ring-[#FFC917]/40"
+          />
+        </div>
       </div>
 
-      <div>
-        <label
-          htmlFor="password"
-          className="mb-1 block text-sm font-medium text-[#1a1a1a]"
-        >
+      {/* Password Field */}
+      <div className="flex flex-col gap-2">
+        <label className="text-[#3e484f] text-sm font-medium font-jakarta">
           Password
         </label>
-        <input
-          id="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full border border-black/20 px-3 py-2.5 text-sm outline-none focus:border-[#ffc91f] focus:ring-1 focus:ring-[#ffc91f]"
-          placeholder="••••••••"
-        />
+        <div className="relative">
+          <div className="absolute left-0 top-0 bottom-0 flex items-center pl-4 pointer-events-none">
+            <Lock className="w-5 h-5 text-[#6e7980]" />
+          </div>
+          <input
+            type={showPassword ? "text" : "password"}
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            className="w-full bg-[#f6f6f6] rounded-[8px] pl-11 pr-12 py-4 text-base font-jakarta text-[#191c1e] placeholder:text-[rgba(110,121,128,0.6)] outline-none focus:ring-2 focus:ring-[#FFC917]/40"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((v) => !v)}
+            className="absolute right-0 top-0 bottom-0 flex items-center pr-4 text-[#6e7980] hover:text-[#191c1e] transition-colors"
+          >
+            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       {error && (
-        <p className="rounded-sm bg-red-50 px-3 py-2 text-sm text-red-600">
+        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-jakarta text-red-600">
           {error}
         </p>
       )}
 
+      {/* Submit */}
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-[#ffc91f] px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-[#ffb901] disabled:opacity-60"
+        className="w-full bg-[#FFC917] hover:bg-[#ffb901] rounded-[8px] py-4 text-base font-semibold font-jakarta text-white transition-colors disabled:opacity-60"
       >
         {loading ? "Masuk..." : "Masuk"}
       </button>

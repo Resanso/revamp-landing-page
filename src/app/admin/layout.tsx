@@ -20,11 +20,11 @@ export default async function AdminLayout({
   const nim: string = meta.nim ?? "-";
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#f6f6f6]">
+    <div className="flex h-screen overflow-hidden bg-[#F9F9F9]">
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <AdminNavbar name={name} email={user.email ?? ""} nim={nim} />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-10">{children}</main>
       </div>
     </div>
   );
