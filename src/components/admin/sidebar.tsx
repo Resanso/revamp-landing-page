@@ -7,6 +7,8 @@ const navItems = [
   { label: "Home", href: "/admin/home" },
   { label: "Hall of Fame", href: "/admin/hall-of-fame" },
   { label: "Activities", href: "/admin/activities" },
+  { label: "Executive Members", href: "/admin/executives" },
+  { label: "Executive Gallery", href: "/admin/gallery" },
 ];
 
 export default function Sidebar() {
