@@ -3,28 +3,27 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Camera, RefreshCw, Trash2, ChevronDown } from "lucide-react";
-import { ACTIVITY_CATEGORIES } from "@/lib/activity-types";
 import { createClient } from "@/lib/supabase/client";
-import type { ActivityCategory } from "@/lib/activity-types";
 
 export type ActivityFormData = {
   title: string;
   excerpt: string;
-  category: ActivityCategory;
+  category: string;
   coverImage: string;
   contentMarkdown: string;
 };
 
 type Props = {
+  categories: string[];
   initial?: ActivityFormData & { date?: string };
   onSubmit: (data: ActivityFormData) => Promise<void>;
   isPending: boolean;
 };
 
-export default function ActivityFormFields({ initial, onSubmit, isPending }: Props) {
+export default function ActivityFormFields({ categories, initial, onSubmit, isPending }: Props) {
   const [title, setTitle] = useState(initial?.title ?? "");
   const [excerpt, setExcerpt] = useState(initial?.excerpt ?? "");
-  const [category, setCategory] = useState<ActivityCategory>(initial?.category ?? "Event");
+  const [category, setCategory] = useState<string>(initial?.category ?? categories[0] ?? "");
   const [coverImage, setCoverImage] = useState(initial?.coverImage ?? "");
   const [contentMarkdown, setContentMarkdown] = useState(initial?.contentMarkdown ?? "");
   const [uploading, setUploading] = useState(false);
@@ -145,7 +144,7 @@ export default function ActivityFormFields({ initial, onSubmit, isPending }: Pro
             </button>
             {showCategoryDropdown && (
               <div className="absolute top-full left-0 right-0 z-20 bg-white border border-[#D9D9D9] rounded-[8px] overflow-hidden shadow-sm mt-1">
-                {ACTIVITY_CATEGORIES.map((cat) => (
+                {categories.map((cat) => (
                   <button
                     key={cat}
                     type="button"

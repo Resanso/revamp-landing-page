@@ -10,6 +10,13 @@ datasource db {
   provider = "postgresql"
 }
 
+model ContentCategory {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
 model Activity {
   id          String   @id @default(uuid())
   slug        String   @unique

@@ -43,7 +43,7 @@ function toActivityMeta(post: {
   };
 }
 
-const categoryEnum = z.enum(ACTIVITY_CATEGORIES);
+const categoryEnum = z.string().min(1);
 
 export const activitiesRouter = createTRPCRouter({
   getAll: baseProcedure
@@ -59,7 +59,7 @@ export const activitiesRouter = createTRPCRouter({
       const { category, q, page, limit } = input;
 
       const where: Prisma.ActivityWhereInput = {};
-      if (category && ACTIVITY_CATEGORIES.includes(category as ActivityCategory)) {
+      if (category) {
         where.category = category;
       }
       if (q) {
