@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import Image from "next/image";
 import LoginForm from "./login-form";
 
 export const metadata = {
@@ -25,23 +26,15 @@ export default async function LoginPage() {
           style={{ boxShadow: "0px 20px 40px -10px rgba(27,73,101,0.08)" }}
         >
           {/* Logo */}
-          <div className="flex flex-col items-start gap-1">
-            <div className="flex items-center gap-2.5">
-              {/* Icon mark */}
-              <div className="relative w-8 h-8 flex-shrink-0">
-                <div className="absolute top-0 left-0 w-[14px] h-[14px] bg-[#231918] rounded-[2px]" />
-                <div className="absolute bottom-0 right-0 w-[14px] h-[14px] bg-[#FFC917] rounded-[2px]" />
-                <div className="absolute top-0 right-0 w-[14px] h-[14px] bg-[#FFC917]/60 rounded-[2px]" />
-                <div className="absolute bottom-0 left-0 w-[14px] h-[14px] bg-[#231918]/40 rounded-[2px]" />
-              </div>
-              <span className="font-jakarta text-[22px] leading-none">
-                <span className="font-bold text-[#231918]">PRO</span>
-                <span className="font-bold text-[#FFC917]">DIGI</span>
-              </span>
-            </div>
-            <p className="text-[#6A6A6A] text-xs font-jakarta ml-[42px]">
-              Inspire Through Creation.
-            </p>
+          <div className="flex items-center justify-start">
+            <Image
+              src="/images/logo-landscape.png"
+              alt="PRODIGI"
+              width={220}
+              height={52}
+              className="object-contain"
+              priority
+            />
           </div>
 
           {/* Divider */}

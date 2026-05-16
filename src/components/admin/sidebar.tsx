@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import { Home, Info, Users, Medal, CalendarDays, Trophy } from "lucide-react";
 
 const navItems = [
@@ -20,19 +21,14 @@ export default function Sidebar() {
     <aside className="flex w-[234px] shrink-0 flex-col bg-[#050816] text-white overflow-hidden">
       {/* Logo */}
       <div className="px-6 py-8">
-        <div className="flex items-center gap-2.5">
-          {/* Icon mark */}
-          <div className="relative w-9 h-9 flex-shrink-0">
-            <div className="absolute top-0 left-0 w-4 h-4 bg-[#FFC917] rounded-sm" />
-            <div className="absolute bottom-0 right-0 w-4 h-4 bg-[#FFC917] rounded-sm" />
-            <div className="absolute top-0 right-0 w-4 h-4 bg-[#FFC917]/40 rounded-sm" />
-            <div className="absolute bottom-0 left-0 w-4 h-4 bg-[#FFC917]/40 rounded-sm" />
-          </div>
-          <span className="font-jakarta text-xl leading-none">
-            <span className="font-normal text-white">PRO</span>
-            <span className="font-bold text-white">DIGI</span>
-          </span>
-        </div>
+        <Image
+          src="/images/logo-white.png"
+          alt="PRODIGI"
+          width={160}
+          height={38}
+          className="object-contain"
+          priority
+        />
       </div>
 
       <nav className="flex-1 flex flex-col pt-2 gap-1">
