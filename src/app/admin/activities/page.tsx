@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getCaller } from "@/trpc/server";
 import ActivitiesAdminClient from "./activities-admin-client";
 
@@ -6,18 +5,15 @@ export const metadata = { title: "Activities | Admin" };
 
 export default async function ActivitiesAdminPage() {
   const caller = await getCaller();
-  const { posts } = await caller.activities.getAll({ page: 1, limit: 50 });
+  const { posts } = await caller.activities.getAll({ page: 1, limit: 100 });
 
   return (
-    <div>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-[#1a1a1a]">Activities</h1>
-        <Link
-          href="/admin/activities/new"
-          className="bg-[#ffc91f] px-4 py-2 text-sm font-semibold text-black transition hover:bg-[#ffb901]"
-        >
-          + Tambah Aktivitas
-        </Link>
+    <div className="space-y-10 pb-20">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-black text-5xl font-bold leading-tight font-jakarta">Manage Activities</h1>
+        <p className="text-black text-sm font-normal leading-tight font-jakarta">
+          Manage activity content including events, information, and articles
+        </p>
       </div>
 
       <ActivitiesAdminClient posts={posts} />
