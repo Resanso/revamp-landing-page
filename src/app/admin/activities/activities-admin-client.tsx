@@ -1,26 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useTRPC } from "@/trpc/client";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Edit2, Trash2, Search } from "lucide-react";
+import { AdminModal } from "@/components/admin/ui/admin-modal";
 import { AdminConfirmModal } from "@/components/admin/ui/admin-confirm-modal";
+import ActivityFormFields from "./activity-form";
 import type { ActivityMeta, ActivityCategory } from "@/lib/activity-types";
 import { ACTIVITY_CATEGORIES } from "@/lib/activity-types";
 
 type Props = { posts: ActivityMeta[] };
-
 type FilterTab = "All" | ActivityCategory;
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("id-ID", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).replace(/\//g, "/");
+    day: "2-digit", month: "2-digit", year: "numeric",
+  });
 }
 
 export default function ActivitiesAdminClient({ posts }: Props) {
@@ -29,22 +27,40 @@ export default function ActivitiesAdminClient({ posts }: Props) {
 
   const [activeTab, setActiveTab] = useState<FilterTab>("All");
   const [search, setSearch] = useState("");
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ActivityMeta | null>(null);
 
+  const tabs: FilterTab[] = ["All", ...ACTIVITY_CATEGORIES];
+
+  const { data: editPost, isLoading: editLoading } = useQuery(
+    trpc.activities.getById.queryOptions(
+      { id: editId! },
+      { enabled: !!editId },
+    ),
+  );
+
+  const createMutation = useMutation(
+    trpc.activities.create.mutationOptions({
+      onSuccess: () => { setShowAddModal(false); router.refresh(); },
+    }),
+  );
+  const updateMutation = useMutation(
+    trpc.activities.update.mutationOptions({
+      onSuccess: () => { setEditId(null); router.refresh(); },
+    }),
+  );
   const deleteMutation = useMutation(
     trpc.activities.delete.mutationOptions({ onSuccess: () => router.refresh() }),
   );
 
   const filtered = posts.filter((p) => {
     const matchTab = activeTab === "All" || p.category === activeTab;
-    const matchSearch =
-      !search ||
+    const matchSearch = !search ||
       p.title.toLowerCase().includes(search.toLowerCase()) ||
       p.excerpt.toLowerCase().includes(search.toLowerCase());
     return matchTab && matchSearch;
   });
-
-  const tabs: FilterTab[] = ["All", ...ACTIVITY_CATEGORIES];
 
   return (
     <div className="bg-white rounded-lg border border-[#D9D9D9] px-8 py-8 flex flex-col gap-6">
@@ -52,13 +68,13 @@ export default function ActivitiesAdminClient({ posts }: Props) {
       <div className="flex flex-col gap-2 border-b border-[#D9D9D9] pb-6">
         <p className="text-[#6A6A6A] text-base font-medium font-jakarta">Content</p>
         <div className="flex items-center gap-4 flex-wrap">
-          <Link
-            href="/admin/activities/new"
+          <button
+            type="button"
+            onClick={() => setShowAddModal(true)}
             className="px-10 py-3.5 bg-white rounded-lg border border-dashed border-[#FFC917] flex justify-center items-center hover:bg-yellow-50 transition-colors"
           >
             <span className="text-[#FFC917] text-base font-medium font-jakarta">New Content</span>
-          </Link>
-
+          </button>
           {tabs.map((tab) => (
             <button
               key={tab}
@@ -86,50 +102,37 @@ export default function ActivitiesAdminClient({ posts }: Props) {
             className="bg-transparent text-base font-medium font-jakarta text-black outline-none placeholder:text-[#A9A9A9] w-full"
           />
         </div>
-        <Link
-          href="/admin/activities/new"
+        <button
+          type="button"
+          onClick={() => setShowAddModal(true)}
           className="bg-[#FFC917] px-10 py-3.5 rounded-lg text-black text-base font-medium font-jakarta hover:bg-[#ffb901] transition-colors whitespace-nowrap"
         >
           Add Activities
-        </Link>
+        </button>
       </div>
 
       {/* Cards grid */}
       {filtered.length === 0 ? (
-        <p className="text-sm text-black/50 font-jakarta py-8 text-center">
-          Belum ada aktivitas.
-        </p>
+        <p className="text-sm text-black/50 font-jakarta py-8 text-center">Belum ada aktivitas.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filtered.map((post) => (
-            <div
-              key={post.id}
-              className="bg-white rounded-lg border border-[#D9D9D9] flex flex-col overflow-hidden"
-            >
-              {/* Image */}
+            <div key={post.id} className="bg-white rounded-lg border border-[#D9D9D9] flex flex-col overflow-hidden">
               <div className="relative h-[200px] bg-gray-100 flex-shrink-0">
                 {post.coverImage ? (
-                  <Image
-                    src={post.coverImage}
-                    alt={post.title}
-                    fill
-                    className="object-cover"
-                  />
+                  <Image src={post.coverImage} alt={post.title} fill className="object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-sm text-black/30 font-jakarta">
-                    No Image
-                  </div>
+                  <div className="w-full h-full flex items-center justify-center text-sm text-black/30 font-jakarta">No Image</div>
                 )}
-                {/* Overlay gradient */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
-                {/* Action buttons */}
                 <div className="absolute top-4 right-4 flex gap-2">
-                  <Link
-                    href={`/admin/activities/${post.id}`}
+                  <button
+                    type="button"
+                    onClick={() => setEditId(post.id)}
                     className="p-2 bg-[#F9FAFB] rounded flex items-center justify-center hover:bg-gray-100 transition-colors"
                   >
                     <Edit2 className="w-4 h-4 text-[#A7A7A7]" />
-                  </Link>
+                  </button>
                   <button
                     type="button"
                     onClick={() => setDeleteTarget(post)}
@@ -139,8 +142,6 @@ export default function ActivitiesAdminClient({ posts }: Props) {
                   </button>
                 </div>
               </div>
-
-              {/* Content */}
               <div className="p-4 flex flex-col gap-3">
                 <span className="text-[#FFC917] text-sm font-bold font-jakarta uppercase tracking-wide">
                   {post.category} • {formatDate(post.date)}
@@ -157,6 +158,47 @@ export default function ActivitiesAdminClient({ posts }: Props) {
         </div>
       )}
 
+      {/* Add Modal */}
+      <AdminModal
+        open={showAddModal}
+        onOpenChange={(open) => setShowAddModal(open)}
+        title="Add new Activities"
+        maxWidth="max-w-[580px]"
+      >
+        <ActivityFormFields
+          onSubmit={async (data) => { await createMutation.mutateAsync(data); }}
+          isPending={createMutation.isPending}
+        />
+      </AdminModal>
+
+      {/* Edit Modal */}
+      <AdminModal
+        open={!!editId}
+        onOpenChange={(open) => !open && setEditId(null)}
+        title="Edit Activities"
+        maxWidth="max-w-[580px]"
+      >
+        {editLoading || !editPost ? (
+          <div className="py-12 flex items-center justify-center">
+            <span className="text-sm text-black/50 font-jakarta">Loading...</span>
+          </div>
+        ) : (
+          <ActivityFormFields
+            initial={{
+              title: editPost.title,
+              excerpt: editPost.excerpt,
+              category: editPost.category,
+              coverImage: editPost.coverImage,
+              contentMarkdown: editPost.contentHtml,
+              date: editPost.date,
+            }}
+            onSubmit={async (data) => { await updateMutation.mutateAsync({ id: editPost.id, ...data }); }}
+            isPending={updateMutation.isPending}
+          />
+        )}
+      </AdminModal>
+
+      {/* Delete Confirm */}
       <AdminConfirmModal
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
