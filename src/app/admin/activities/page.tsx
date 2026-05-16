@@ -5,7 +5,7 @@ export const metadata = { title: "Activities | Admin" };
 
 export default async function ActivitiesAdminPage() {
   const caller = await getCaller();
-  const { posts } = await caller.activities.getAll({ page: 1, limit: 100 });
+  const { posts } = await caller.activities.getAll({ page: 1, limit: 50 });
 
   return (
     <div className="space-y-10 pb-20">
