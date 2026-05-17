@@ -1,5 +1,5 @@
 export const ACTIVITY_CATEGORIES = ["Event", "Information", "Articles"] as const;
-export type ActivityCategory = (typeof ACTIVITY_CATEGORIES)[number];
+export type ActivityCategory = string;
 
 export type ActivityMeta = {
   id: string;

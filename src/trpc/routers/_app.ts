@@ -1,5 +1,6 @@
 import { createTRPCRouter } from "../init";
 import { activitiesRouter } from "./activities";
+import { contentCategoriesRouter } from "./content-categories";
 import { hallOfFameRouter } from "./hall-of-fame";
 import { homeRouter } from "./home";
 import { executivesRouter } from "./executives";
@@ -9,8 +10,7 @@ export const appRouter = createTRPCRouter({
   home: homeRouter,
   hallOfFame: hallOfFameRouter,
   activities: activitiesRouter,
-  executives: executivesRouter,
-  gallery: galleryRouter,
+  contentCategories: contentCategoriesRouter,
 });
 
 export type AppRouter = typeof appRouter;

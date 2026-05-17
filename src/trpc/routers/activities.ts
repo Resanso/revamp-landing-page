@@ -43,7 +43,7 @@ function toActivityMeta(post: {
   };
 }
 
-const categoryEnum = z.enum(ACTIVITY_CATEGORIES);
+const categoryEnum = z.string().min(1);
 
 export const activitiesRouter = createTRPCRouter({
   getAll: baseProcedure
@@ -59,7 +59,7 @@ export const activitiesRouter = createTRPCRouter({
       const { category, q, page, limit } = input;
 
       const where: Prisma.ActivityWhereInput = {};
-      if (category && ACTIVITY_CATEGORIES.includes(category as ActivityCategory)) {
+      if (category) {
         where.category = category;
       }
       if (q) {
@@ -129,6 +129,18 @@ export const activitiesRouter = createTRPCRouter({
         }),
       );
       return result;
+    }),
+
+  getById: baseProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      const post = await prisma.activity.findUnique({ where: { id: input.id } });
+      if (!post) return null;
+      return {
+        ...post,
+        date: post.date.toISOString(),
+        category: post.category as ActivityCategory,
+      };
     }),
 
   create: adminProcedure
