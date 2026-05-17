@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTRPC } from "@/trpc/client";
 import { useMutation } from "@tanstack/react-query";
 import Image from "next/image";
+import { Camera } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { parseTRPCClientErrorMessage } from "@/lib/utils/error";
 
@@ -123,35 +124,31 @@ export default function ExecutiveMemberForm({ initial }: Props) {
 
       {/* Foto Preview */}
       <div>
-        <label className="mb-1 block text-sm font-medium">Foto Member</label>
+        <label className="mb-2 block text-sm font-medium">Foto Member *</label>
 
-        {/* Preview gambar */}
-        <div className="mb-3 relative aspect-square w-40 overflow-hidden border border-black/10 bg-[#f5f5f5]">
+        <label className="cursor-pointer block max-w-xs">
           {form.image ? (
-            <Image
-              src={form.image}
-              alt="Preview foto member"
-              fill
-              className="object-cover object-center"
-            />
+            <div className="relative w-full aspect-square rounded-lg overflow-hidden border border-[#D9D9D9]">
+              <Image src={form.image} alt="Preview foto member" fill className="object-cover object-top" />
+              <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                <span className="text-white text-sm font-jakarta font-medium">Change photo</span>
+              </div>
+            </div>
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-xs text-black/30">
-              Belum ada foto
+            <div className="w-full aspect-square border border-dashed border-[#D9D9D9] rounded-lg flex flex-col items-center justify-center gap-3 hover:bg-gray-50 transition-colors">
+              <div className="w-16 h-16 bg-[rgba(255,201,23,0.15)] rounded-full flex items-center justify-center">
+                <Camera className="w-6 h-6 text-[#FFC917]" />
+              </div>
+              <div className="text-center px-4">
+                <p className="text-black font-medium text-sm font-jakarta">Drag &amp; drop image here</p>
+                <p className="text-[#A9A9A9] text-xs font-jakarta mt-1">Supported only JPG and PNG</p>
+              </div>
             </div>
           )}
-        </div>
-
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleImageUpload}
-          className="text-sm"
-        />
+          <input type="file" accept="image/jpeg,image/png" onChange={handleImageUpload} className="hidden" />
+        </label>
         {uploading && (
-          <p className="mt-1 text-xs text-black/50">Mengupload...</p>
-        )}
-        {form.image && !uploading && (
-          <p className="mt-1 truncate text-xs text-black/40">{form.image}</p>
+          <p className="mt-2 text-xs text-black/50 font-jakarta">Mengupload...</p>
         )}
       </div>
 
