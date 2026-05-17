@@ -13,9 +13,10 @@ export default async function GalleryAdminPage() {
     : { images: [] };
 
   return (
-    <div>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-[#1a1a1a]">Executive Gallery</h1>
+    <div className="space-y-10 pb-20">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-black text-5xl font-bold leading-tight font-jakarta break-words">Manage Executive Gallery</h1>
+        <p className="text-black text-sm font-normal leading-tight font-jakarta break-words">Manage executive gallery photos</p>
       </div>
       <GalleryAdminClient
         initialYears={years}

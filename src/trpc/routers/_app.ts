@@ -10,6 +10,8 @@ export const appRouter = createTRPCRouter({
   home: homeRouter,
   hallOfFame: hallOfFameRouter,
   activities: activitiesRouter,
+  executives: executivesRouter,
+  gallery: galleryRouter,
   contentCategories: contentCategoriesRouter,
 });
 
