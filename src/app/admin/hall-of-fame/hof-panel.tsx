@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import { useTRPC } from "@/trpc/client";
 import { useMutation } from "@tanstack/react-query";
 import Image from "next/image";
+import { Edit2, Trash2, Search, Camera } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { AdminModal } from "@/components/admin/ui/admin-modal";
+import { AdminConfirmModal } from "@/components/admin/ui/admin-confirm-modal";
 
 type Entry = {
   id: number;
@@ -25,8 +28,10 @@ export default function HofPanel({ years, entriesByYear }: Props) {
   const trpc = useTRPC();
 
   const [activeYear, setActiveYear] = useState(years[0] ?? "");
+  const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Entry | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Entry | null>(null);
 
   const [formYear, setFormYear] = useState("");
   const [formTitle, setFormTitle] = useState("");
@@ -84,6 +89,7 @@ export default function HofPanel({ years, entriesByYear }: Props) {
       setFormImage(urlData.publicUrl);
     } finally {
       setUploading(false);
+      e.target.value = "";
     }
   };
 
@@ -97,90 +103,197 @@ export default function HofPanel({ years, entriesByYear }: Props) {
     }
   };
 
-  const currentEntries = entriesByYear[activeYear] ?? [];
+  const currentEntries = (entriesByYear[activeYear] ?? []).filter((e) =>
+    !search ||
+    e.title.toLowerCase().includes(search.toLowerCase()) ||
+    e.competition.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <div>
-      {/* Year Tabs */}
-      <div className="mb-6 flex flex-wrap gap-2">
-        {years.map((y) => (
+    <div className="bg-white rounded-lg border border-[#D9D9D9] px-8 py-8 flex flex-col gap-6">
+      {/* Period */}
+      <div className="flex flex-col gap-2 border-b border-[#D9D9D9] pb-6">
+        <p className="text-[#6A6A6A] text-base font-medium font-jakarta">Period</p>
+        <div className="flex items-center gap-4 flex-wrap">
           <button
-            key={y}
             type="button"
-            onClick={() => setActiveYear(y)}
-            className={`border px-4 py-2 text-sm font-semibold transition ${
-              y === activeYear ? "border-[#ffc91f] bg-[#ffc91f] text-black" : "border-black/15 bg-white text-black/70 hover:text-black"
-            }`}
+            onClick={() => { setFormYear(""); openCreate(); }}
+            className="px-10 py-4 bg-white rounded-lg border border-dashed border-[#FFC917] flex justify-center items-center hover:bg-yellow-50 transition-colors"
           >
-            {y}
+            <span className="text-[#FFC917] text-base font-medium font-jakarta">New Period</span>
           </button>
-        ))}
+
+          {years.map((y) => (
+            <button
+              key={y}
+              type="button"
+              onClick={() => setActiveYear(y)}
+              className={`px-10 py-4 rounded-lg border border-[#D9D9D9] flex justify-center items-center transition-colors ${
+                y === activeYear ? "bg-[#FFC917]" : "bg-transparent hover:bg-black/5"
+              }`}
+            >
+              <span className="text-black text-base font-medium font-jakarta">{y}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Search + Add */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="border border-[#D9D9D9] rounded-lg flex items-center gap-3 px-6 py-3.5 w-[327px]">
+          <Search className="w-5 h-5 text-[#A9A9A9] flex-shrink-0" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search..."
+            className="bg-transparent text-base font-medium font-jakarta text-black outline-none placeholder:text-[#A9A9A9] w-full"
+          />
+        </div>
         <button
           type="button"
           onClick={openCreate}
-          className="border border-dashed border-black/30 bg-white px-4 py-2 text-sm text-black/50 transition hover:border-black/50 hover:text-black"
+          className="bg-[#FFC917] px-10 py-4 rounded-lg text-black text-base font-medium font-jakarta hover:bg-[#ffb901] transition-colors whitespace-nowrap"
         >
-          + Tambah Entry
+          Add Achievements
         </button>
       </div>
 
-      {/* Entry Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {/* Cards grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {currentEntries.map((entry) => (
-          <div key={entry.id} className="border border-black/10 bg-white">
-            <div className="relative aspect-video bg-[#f5f5f5]">
-              <Image src={entry.image} alt={entry.title} fill className="object-cover" />
-            </div>
-            <div className="p-3">
-              <p className="font-semibold text-[#1a1a1a]">{entry.title}</p>
-              <p className="text-sm text-black/60">{entry.competition}</p>
-              <div className="mt-3 flex gap-3 text-sm">
-                <button type="button" onClick={() => openEdit(entry)} className="text-blue-600 hover:underline">Edit</button>
+          <div key={entry.id} className="bg-white rounded-lg border border-[#D9D9D9] flex flex-col overflow-hidden">
+            <div className="relative h-[188px] bg-gray-100 flex-shrink-0">
+              {entry.image ? (
+                <Image src={entry.image} alt={entry.title} fill className="object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-sm text-black/50 font-jakarta">
+                  No Image
+                </div>
+              )}
+              <div className="absolute top-4 right-4 flex gap-2">
                 <button
                   type="button"
-                  onClick={() => { if (confirm(`Hapus "${entry.title}"?`)) deleteMutation.mutate({ id: entry.id }); }}
-                  className="text-red-600 hover:underline"
-                >Hapus</button>
+                  onClick={() => openEdit(entry)}
+                  className="p-2 bg-[#F9FAFB] rounded flex items-center justify-center hover:bg-gray-100 transition-colors"
+                >
+                  <Edit2 className="w-4 h-4 text-[#A7A7A7]" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDeleteTarget(entry)}
+                  className="p-2 bg-[#F9FAFB] rounded flex items-center justify-center hover:bg-gray-100 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4 text-[#F75F5F]" />
+                </button>
               </div>
+            </div>
+
+            <div className="p-4 flex flex-col gap-2">
+              <span className="text-black text-2xl font-semibold leading-[35px] font-jakarta break-words">
+                {entry.title}
+              </span>
+              <span className="text-black text-base font-light font-jakarta break-words">
+                {entry.competition}
+              </span>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Form Modal */}
-      {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md border border-black/10 bg-white p-6">
-            <h2 className="mb-4 text-lg font-bold">{editing ? "Edit Entry" : "Tambah Entry"}</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="mb-1 block text-sm font-medium">Tahun</label>
-                <input type="text" required value={formYear} onChange={(e) => setFormYear(e.target.value)} className="w-full border border-black/20 px-3 py-2 text-sm outline-none focus:border-[#ffc91f]" placeholder="2024" />
+      {/* Add / Edit Modal */}
+      <AdminModal
+        open={showForm}
+        onOpenChange={setShowForm}
+        title={editing ? "Edit Achievement" : "Add new Achievement"}
+      >
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
+          <label className="cursor-pointer block">
+            {formImage ? (
+              <div className="relative w-full h-[200px] rounded-lg overflow-hidden border border-[#D9D9D9]">
+                <Image src={formImage} alt="Preview" fill className="object-cover" />
+                <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                  <span className="text-white text-sm font-jakarta font-medium">Change photo</span>
+                </div>
               </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium">Judul Pencapaian</label>
-                <input type="text" required value={formTitle} onChange={(e) => setFormTitle(e.target.value)} className="w-full border border-black/20 px-3 py-2 text-sm outline-none focus:border-[#ffc91f]" placeholder="Juara 1" />
+            ) : (
+              <div className="w-full border border-dashed border-[#D9D9D9] rounded-lg py-10 flex flex-col items-center gap-3 hover:bg-gray-50 transition-colors">
+                <div className="w-20 h-20 bg-[rgba(255,201,23,0.15)] rounded-full flex items-center justify-center">
+                  <Camera className="w-8 h-8 text-[#FFC917]" />
+                </div>
+                <div className="text-center">
+                  <p className="text-black font-medium text-base font-jakarta">Drag &amp; drop image here</p>
+                  <p className="text-[#A9A9A9] text-sm font-jakarta mt-1">Supported only JPG and PNG</p>
+                </div>
               </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium">Deskripsi Lomba</label>
-                <input type="text" required value={formCompetition} onChange={(e) => setFormCompetition(e.target.value)} className="w-full border border-black/20 px-3 py-2 text-sm outline-none focus:border-[#ffc91f]" placeholder="Big Data Challenge Satria Data 2024" />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium">Foto</label>
-                <input type="file" accept="image/*" onChange={handleImageUpload} className="text-sm" />
-                {uploading && <p className="mt-1 text-xs text-black/50">Uploading...</p>}
-                {formImage && <p className="mt-1 truncate text-xs text-black/50">{formImage}</p>}
-              </div>
-              <div className="flex gap-3 pt-2">
-                <button type="submit" disabled={createMutation.isPending || updateMutation.isPending || uploading} className="bg-[#ffc91f] px-5 py-2 text-sm font-semibold text-black disabled:opacity-60">
-                  {createMutation.isPending || updateMutation.isPending ? "Menyimpan..." : "Simpan"}
-                </button>
-                <button type="button" onClick={resetForm} className="border border-black/20 px-5 py-2 text-sm">Batal</button>
-              </div>
-            </form>
+            )}
+            <input type="file" accept="image/jpeg,image/png" onChange={handleImageUpload} className="hidden" />
+          </label>
+
+          {uploading && <p className="text-xs text-black/50 font-jakarta">Uploading...</p>}
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium font-jakarta text-black">Judul Pencapaian</label>
+            <input
+              type="text"
+              required
+              value={formTitle}
+              onChange={(e) => setFormTitle(e.target.value)}
+              className="w-full border border-[#D9D9D9] rounded-lg px-4 py-3 text-sm outline-none focus:border-[#FFC917] font-jakarta"
+              placeholder="Juara 1"
+            />
           </div>
-        </div>
-      )}
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium font-jakarta text-black">Deskripsi Lomba</label>
+            <input
+              type="text"
+              required
+              value={formCompetition}
+              onChange={(e) => setFormCompetition(e.target.value)}
+              className="w-full border border-[#D9D9D9] rounded-lg px-4 py-3 text-sm outline-none focus:border-[#FFC917] font-jakarta"
+              placeholder="Big Data Challenge Satria Data 2024"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium font-jakarta text-black">Tahun</label>
+            <input
+              type="text"
+              required
+              value={formYear}
+              onChange={(e) => setFormYear(e.target.value)}
+              className="w-full border border-[#D9D9D9] rounded-lg px-4 py-3 text-sm outline-none focus:border-[#FFC917] font-jakarta"
+              placeholder="2024"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={isPending || uploading}
+            className="w-full bg-[#FFC917] hover:bg-[#ffb901] py-4 rounded-lg text-base font-semibold text-black disabled:opacity-60 transition-colors font-jakarta mt-2"
+          >
+            {isPending ? "Menyimpan..." : "Save"}
+          </button>
+        </form>
+      </AdminModal>
+
+      <AdminConfirmModal
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Hapus Entry"
+        description={`Apakah Anda yakin ingin menghapus "${deleteTarget?.title}"? Tindakan ini tidak dapat dibatalkan.`}
+        confirmText="Ya, Hapus"
+        cancelText="Batal"
+        onConfirm={() => {
+          if (deleteTarget) {
+            deleteMutation.mutate({ id: deleteTarget.id });
+            setDeleteTarget(null);
+          }
+        }}
+      />
     </div>
   );
 }

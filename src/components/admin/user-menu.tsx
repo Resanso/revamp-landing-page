@@ -25,10 +25,16 @@ export default function UserMenu({ name, email, nim }: UserMenuProps) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex h-8 w-8 items-center justify-center rounded-full bg-[#ffc91f] text-sm font-bold text-black transition hover:bg-[#ffb901]"
+        className="flex w-[180px] items-center justify-end gap-2"
         aria-label="User menu"
       >
-        {name.charAt(0).toUpperCase()}
+        <div className="flex flex-col items-end w-[140px]">
+          <span className="text-right text-black text-xs font-semibold leading-tight font-jakarta">{name}</span>
+          <span className="text-right text-black text-[10px] font-light leading-tight font-jakarta">Administrator</span>
+        </div>
+        <div className="w-8 h-8 rounded-full shadow-[0px_2px_4px_-2px_rgba(0,0,0,0.10),0px_4px_6px_-1px_rgba(0,0,0,0.10),0px_0px_0px_2px_#FBBF24] overflow-hidden bg-gray-200 flex items-center justify-center">
+          <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`} alt={name} className="w-full h-full object-cover" />
+        </div>
       </button>
 
       {open && (

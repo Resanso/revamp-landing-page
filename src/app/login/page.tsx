@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import Image from "next/image";
 import LoginForm from "./login-form";
 
 export const metadata = {
@@ -17,17 +18,34 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f6f6f6] px-4">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-[#1a1a1a]">
-            PRODIGI
-          </h1>
-          <p className="mt-1 text-sm text-black/50">Admin Panel</p>
-        </div>
+    <div className="min-h-screen bg-white flex items-center justify-center px-4">
+      <div className="w-full max-w-[475px]">
+        {/* Card */}
+        <div
+          className="bg-white border border-[#ededed] rounded-[8px] px-8 pt-10 pb-8 flex flex-col gap-8"
+          style={{ boxShadow: "0px 20px 40px -10px rgba(27,73,101,0.08)" }}
+        >
+          {/* Logo */}
+          <div className="flex items-center justify-start">
+            <Image
+              src="/images/logo-landscape.png"
+              alt="PRODIGI"
+              width={220}
+              height={52}
+              className="object-contain"
+              priority
+            />
+          </div>
 
-        <div className="border border-black/10 bg-white p-8">
-          <h2 className="mb-6 text-lg font-semibold text-[#1a1a1a]">Masuk</h2>
+          {/* Divider */}
+          <div className="h-px w-full bg-[#e6e8ea]" />
+
+          {/* Heading */}
+          <h2 className="text-[#191c1e] text-2xl font-bold font-jakarta text-center w-full">
+            Masuk Sekarang
+          </h2>
+
+          {/* Form */}
           <LoginForm />
         </div>
       </div>
