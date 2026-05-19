@@ -105,3 +105,15 @@ model Department {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model Competition {
+  id         Int      @id @default(1)
+  gemastik   String   @default("")
+  lidm       String   @default("")
+  satriaData String   @default("")
+  pkm        String   @default("")
+  p2mw       String   @default("")
+  internal   String   @default("")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}

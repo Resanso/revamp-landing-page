@@ -15,7 +15,9 @@ type Props = { posts: ActivityMeta[] };
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("id-ID", {
-    day: "2-digit", month: "2-digit", year: "numeric",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
   });
 }
 
@@ -49,32 +51,44 @@ export default function ActivitiesAdminClient({ posts }: Props) {
   const createCategoryMutation = useMutation(
     trpc.contentCategories.create.mutationOptions({
       onSuccess: async () => {
-        await queryClient.invalidateQueries(trpc.contentCategories.list.queryFilter());
+        await queryClient.invalidateQueries(
+          trpc.contentCategories.list.queryFilter(),
+        );
         setShowNewContentModal(false);
         setNewContentName("");
         setNewContentError(null);
       },
-      onError: () => setNewContentError("Nama kategori sudah ada atau terjadi kesalahan."),
+      onError: () =>
+        setNewContentError("Nama kategori sudah ada atau terjadi kesalahan."),
     }),
   );
 
   const createMutation = useMutation(
     trpc.activities.create.mutationOptions({
-      onSuccess: () => { setShowAddModal(false); router.refresh(); },
+      onSuccess: () => {
+        setShowAddModal(false);
+        router.refresh();
+      },
     }),
   );
   const updateMutation = useMutation(
     trpc.activities.update.mutationOptions({
-      onSuccess: () => { setEditId(null); router.refresh(); },
+      onSuccess: () => {
+        setEditId(null);
+        router.refresh();
+      },
     }),
   );
   const deleteMutation = useMutation(
-    trpc.activities.delete.mutationOptions({ onSuccess: () => router.refresh() }),
+    trpc.activities.delete.mutationOptions({
+      onSuccess: () => router.refresh(),
+    }),
   );
 
   const filtered = posts.filter((p) => {
     const matchTab = activeTab === "All" || p.category === activeTab;
-    const matchSearch = !search ||
+    const matchSearch =
+      !search ||
       p.title.toLowerCase().includes(search.toLowerCase()) ||
       p.excerpt.toLowerCase().includes(search.toLowerCase());
     return matchTab && matchSearch;
@@ -84,14 +98,18 @@ export default function ActivitiesAdminClient({ posts }: Props) {
     <div className="bg-white rounded-lg border border-[#D9D9D9] px-8 py-8 flex flex-col gap-6">
       {/* Content type tabs */}
       <div className="flex flex-col gap-2 border-b border-[#D9D9D9] pb-6">
-        <p className="text-[#6A6A6A] text-base font-medium font-jakarta">Content</p>
+        <p className="text-[#6A6A6A] text-base font-medium font-jakarta">
+          Content
+        </p>
         <div className="flex items-center gap-4 flex-wrap">
           <button
             type="button"
             onClick={() => setShowNewContentModal(true)}
             className="px-10 py-3.5 bg-white rounded-lg border border-dashed border-[#FFC917] flex justify-center items-center hover:bg-yellow-50 transition-colors"
           >
-            <span className="text-[#FFC917] text-base font-medium font-jakarta">New Content</span>
+            <span className="text-[#FFC917] text-base font-medium font-jakarta">
+              New Content
+            </span>
           </button>
           {tabs.map((tab) => (
             <button
@@ -99,10 +117,14 @@ export default function ActivitiesAdminClient({ posts }: Props) {
               type="button"
               onClick={() => setActiveTab(tab)}
               className={`px-10 py-3.5 rounded-lg border border-[#D9D9D9] flex justify-center items-center transition-colors ${
-                tab === activeTab ? "bg-[#FFC917]" : "bg-transparent hover:bg-black/5"
+                tab === activeTab
+                  ? "bg-[#FFC917]"
+                  : "bg-transparent hover:bg-black/5"
               }`}
             >
-              <span className="text-black text-base font-medium font-jakarta">{tab}</span>
+              <span className="text-black text-base font-medium font-jakarta">
+                {tab}
+              </span>
             </button>
           ))}
         </div>
@@ -131,16 +153,28 @@ export default function ActivitiesAdminClient({ posts }: Props) {
 
       {/* Cards grid */}
       {filtered.length === 0 ? (
-        <p className="text-sm text-black/50 font-jakarta py-8 text-center">Belum ada aktivitas.</p>
+        <p className="text-sm text-black/50 font-jakarta py-8 text-center">
+          Belum ada aktivitas.
+        </p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filtered.map((post) => (
-            <div key={post.id} className="bg-white rounded-lg border border-[#D9D9D9] flex flex-col overflow-hidden">
+            <div
+              key={post.id}
+              className="bg-white rounded-lg border border-[#D9D9D9] flex flex-col overflow-hidden"
+            >
               <div className="relative h-[200px] bg-gray-100 flex-shrink-0">
                 {post.coverImage ? (
-                  <Image src={post.coverImage} alt={post.title} fill className="object-cover" />
+                  <Image
+                    src={post.coverImage}
+                    alt={post.title}
+                    fill
+                    className="object-cover"
+                  />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-sm text-black/30 font-jakarta">No Image</div>
+                  <div className="w-full h-full flex items-center justify-center text-sm text-black/30 font-jakarta">
+                    No Image
+                  </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
                 <div className="absolute top-4 right-4 flex gap-2">
@@ -181,7 +215,10 @@ export default function ActivitiesAdminClient({ posts }: Props) {
         open={showNewContentModal}
         onOpenChange={(open) => {
           setShowNewContentModal(open);
-          if (!open) { setNewContentName(""); setNewContentError(null); }
+          if (!open) {
+            setNewContentName("");
+            setNewContentError(null);
+          }
         }}
         title="Add New Content"
         maxWidth="max-w-[480px]"
@@ -195,7 +232,9 @@ export default function ActivitiesAdminClient({ posts }: Props) {
           }}
         >
           <div className="flex flex-col gap-2">
-            <label className="text-black text-sm font-normal font-jakarta">Category Name</label>
+            <label className="text-black text-sm font-normal font-jakarta">
+              Category Name
+            </label>
             <input
               type="text"
               required
@@ -206,7 +245,9 @@ export default function ActivitiesAdminClient({ posts }: Props) {
             />
           </div>
           {newContentError && (
-            <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-jakarta text-red-600">{newContentError}</p>
+            <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-jakarta text-red-600">
+              {newContentError}
+            </p>
           )}
           <button
             type="submit"
@@ -227,7 +268,9 @@ export default function ActivitiesAdminClient({ posts }: Props) {
       >
         <ActivityFormFields
           categories={categories.map((c) => c.name)}
-          onSubmit={async (data) => { await createMutation.mutateAsync(data); }}
+          onSubmit={async (data) => {
+            await createMutation.mutateAsync(data);
+          }}
           isPending={createMutation.isPending}
         />
       </AdminModal>
@@ -241,7 +284,9 @@ export default function ActivitiesAdminClient({ posts }: Props) {
       >
         {editLoading || !editPost ? (
           <div className="py-12 flex items-center justify-center">
-            <span className="text-sm text-black/50 font-jakarta">Loading...</span>
+            <span className="text-sm text-black/50 font-jakarta">
+              Loading...
+            </span>
           </div>
         ) : (
           <ActivityFormFields
@@ -254,7 +299,9 @@ export default function ActivitiesAdminClient({ posts }: Props) {
               contentMarkdown: editPost.contentHtml,
               date: editPost.date,
             }}
-            onSubmit={async (data) => { await updateMutation.mutateAsync({ id: editPost.id, ...data }); }}
+            onSubmit={async (data) => {
+              await updateMutation.mutateAsync({ id: editPost.id, ...data });
+            }}
             isPending={updateMutation.isPending}
           />
         )}
