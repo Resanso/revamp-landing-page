@@ -8,7 +8,9 @@ import {
   topBarMainLinks,
   topBarSwitches,
 } from "@/data/landing-content";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { useTRPC } from "@/trpc/client";
+import { useQuery } from "@tanstack/react-query";
 
 import Image from "next/image";
 import Link from "next/link";
