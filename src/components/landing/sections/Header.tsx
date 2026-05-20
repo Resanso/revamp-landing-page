@@ -16,8 +16,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { useContactModal } from "@/components/landing/ui/ContactModalContext";
-import { useTRPC } from "@/trpc/client";
-import { useQuery } from "@tanstack/react-query";
 
 const socialIconMap = {
   GitHub: FaGithub,

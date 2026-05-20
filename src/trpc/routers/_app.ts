@@ -6,7 +6,6 @@ import { hallOfFameRouter } from "./hall-of-fame";
 import { homeRouter } from "./home";
 import { executivesRouter } from "./executives";
 import { galleryRouter } from "./gallery";
-import { competitionRouter } from "./competition";
 
 export const appRouter = createTRPCRouter({
   home: homeRouter,
