@@ -16,6 +16,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { useContactModal } from "@/components/landing/ui/ContactModalContext";
+import { useTRPC } from "@/trpc/client";
+import { useQuery } from "@tanstack/react-query";
 
 const socialIconMap = {
   GitHub: FaGithub,
@@ -46,38 +48,40 @@ function isGroupedColumns(columns: unknown[]): columns is NavGroupedColumn[] {
 export default function Header() {
   const { openContactModal } = useContactModal();
   const trpc = useTRPC();
-  const { data: competitionData } = useQuery(trpc.competition.get.queryOptions());
+  const { data: competition } = useQuery(
+    trpc.competition.get.queryOptions(),
+  );
 
+  // Overlay the live competition destination links (managed in the admin
+  // panel) on top of the static nav config, matched by link label.
   const navItems = useMemo(() => {
-    if (!competitionData) return mainNavItems;
-
+    if (!competition) return mainNavItems;
+    const urlByLabel: Record<string, string> = {
+      Gemastik: competition.gemastik,
+      LIDM: competition.lidm,
+      "Satria Data": competition.satriaData,
+      PKM: competition.pkm,
+      P2MW: competition.p2mw,
+      Adikara: competition.internal,
+    };
     return mainNavItems.map((item) => {
-      if (item.label === "Competitions") {
-        return {
-          ...item,
-          columns: [
-            {
-              title: "Belmawa",
-              links: [
-                { label: "Gemastik", href: competitionData.gemastik || "#" },
-                { label: "LIDM", href: competitionData.lidm || "#" },
-                { label: "Satria Data", href: competitionData.satriaData || "#" },
-                { label: "PKM", href: competitionData.pkm || "#" },
-                { label: "P2MW", href: competitionData.p2mw || "#" },
-              ],
-            },
-            {
-              title: "Internal",
-              links: [
-                { label: "Adikara", href: competitionData.internal || "#" },
-              ],
-            },
-          ],
-        };
-      }
-      return item;
+      if (item.label !== "Competitions" || !item.columns) return item;
+      return {
+        ...item,
+        columns: item.columns.map((column) =>
+          "links" in column
+            ? {
+                ...column,
+                links: column.links.map((link) => ({
+                  ...link,
+                  href: urlByLabel[link.label] || link.href,
+                })),
+              }
+            : column,
+        ),
+      };
     });
-  }, [competitionData]);
+  }, [competition]);
 
   const [hasMounted, setHasMounted] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
