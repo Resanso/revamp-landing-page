@@ -84,6 +84,14 @@ async function main() {
     console.log(`- Skipping hall of fame (${existingHof} already exist)`);
   }
 
+  // Competition (singleton)
+  await prisma.competition.upsert({
+    where: { id: 1 },
+    update: {},
+    create: { id: 1 },
+  });
+  console.log("✓ Ensured competition singleton exists");
+
   console.log("Done!");
 }
 
