@@ -133,11 +133,11 @@ export default function GalleryAdminClient({
       {/* Cards grid */}
       {imagesQuery.isLoading ? (
         <p className="text-sm text-black/50 font-jakarta py-8 text-center">
-          Memuat data...
+          Loading data...
         </p>
       ) : filtered.length === 0 ? (
         <p className="text-sm text-black/50 font-jakarta py-8 text-center">
-          Belum ada foto untuk tahun ini atau tidak ditemukan dalam pencarian.
+          No photos found for this year or matching the search.
         </p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -184,11 +184,11 @@ export default function GalleryAdminClient({
           setModalOpen(open);
           if (!open) setEditTarget(null);
         }}
-        title={editTarget ? "Edit Foto" : "Tambah Foto"}
+        title={editTarget ? "Edit Photo" : "Add Photo"}
         description={
           editTarget
-            ? `Edit foto tahun ${editTarget.year}`
-            : "Upload foto baru ke galeri"
+            ? `Edit photo for year ${editTarget.year}`
+            : "Upload a new photo to the gallery"
         }
         maxWidth="max-w-2xl"
       >
@@ -203,10 +203,10 @@ export default function GalleryAdminClient({
       <AdminConfirmModal
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Hapus Foto"
-        description={`Apakah Anda yakin ingin menghapus foto tahun "${deleteTarget?.year}"? Tindakan ini tidak dapat dibatalkan.`}
-        confirmText="Ya, Hapus"
-        cancelText="Batal"
+        title="Delete Photo"
+        description={`Are you sure you want to delete the photo for year "${deleteTarget?.year}"? This action cannot be undone.`}
+        confirmText="Yes, Delete"
+        cancelText="Cancel"
         onConfirm={() => {
           if (deleteTarget) {
             deleteMutation.mutate({ id: deleteTarget.id });

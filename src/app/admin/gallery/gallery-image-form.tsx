@@ -70,9 +70,9 @@ export default function GalleryImageForm({ initial, onSuccess }: Props) {
       setForm((prev) => ({ ...prev, imageUrl: urlData.publicUrl }));
     } catch (err) {
       if (err instanceof Error) {
-        setError(`Gagal upload: ${err.message}`);
+        setError(`Upload failed: ${err.message}`);
       } else {
-        setError("Gagal upload gambar. Coba lagi.");
+        setError("Failed to upload image. Please try again.");
       }
     } finally {
       setUploading(false);
@@ -85,7 +85,7 @@ export default function GalleryImageForm({ initial, onSuccess }: Props) {
     setFieldErrors({});
 
     if (!form.imageUrl) {
-      setError("Foto wajib diupload.");
+      setError("A photo is required.");
       return;
     }
 
@@ -106,7 +106,7 @@ export default function GalleryImageForm({ initial, onSuccess }: Props) {
         setFieldErrors(parsedErrors);
       } else {
         if (err instanceof Error) setError(err.message);
-        else setError("Terjadi kesalahan. Coba lagi.");
+        else setError("An error occurred. Please try again.");
       }
     }
   };
@@ -121,9 +121,9 @@ export default function GalleryImageForm({ initial, onSuccess }: Props) {
         </p>
       )}
 
-      {/* Tahun */}
+      {/* Year */}
       <div>
-        <label className="mb-1 block text-sm font-medium">Tahun *</label>
+        <label className="mb-1 block text-sm font-medium">Year *</label>
         <input
           type="text"
           value={form.year}
@@ -136,14 +136,14 @@ export default function GalleryImageForm({ initial, onSuccess }: Props) {
         )}
       </div>
 
-      {/* Preview gambar */}
+      {/* Gallery Photo */}
       <div>
-        <label className="mb-2 block text-sm font-medium">Foto Galeri *</label>
+        <label className="mb-2 block text-sm font-medium">Gallery Photo *</label>
 
         <label className="cursor-pointer block w-full max-w-lg">
           {form.imageUrl ? (
             <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-[#D9D9D9]">
-              <Image src={form.imageUrl} alt="Preview foto galeri" fill className="object-cover" />
+              <Image src={form.imageUrl} alt="Gallery photo preview" fill className="object-cover" />
               <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                 <span className="text-white text-sm font-jakarta font-medium">Change photo</span>
               </div>
@@ -162,7 +162,7 @@ export default function GalleryImageForm({ initial, onSuccess }: Props) {
           <input type="file" accept="image/jpeg,image/png" onChange={handleImageUpload} className="hidden" />
         </label>
         {uploading && (
-          <p className="mt-2 text-xs text-black/50 font-jakarta">Mengupload...</p>
+          <p className="mt-2 text-xs text-black/50 font-jakarta">Uploading...</p>
         )}
         {fieldErrors.imageUrl && (
           <p className="mt-1 text-xs text-red-500">{fieldErrors.imageUrl}</p>
@@ -177,10 +177,10 @@ export default function GalleryImageForm({ initial, onSuccess }: Props) {
           className="bg-[#ffc91f] px-6 py-2 text-sm font-semibold text-black transition hover:bg-[#ffb901] disabled:opacity-60"
         >
           {isPending
-            ? "Menyimpan..."
+            ? "Saving..."
             : initial
-              ? "Simpan Perubahan"
-              : "Tambah Foto"}
+              ? "Save Changes"
+              : "Add Photo"}
         </button>
         <button
           type="button"
@@ -190,7 +190,7 @@ export default function GalleryImageForm({ initial, onSuccess }: Props) {
           }}
           className="border border-black/20 px-6 py-2 text-sm font-medium transition hover:bg-black/5"
         >
-          Batal
+          Cancel
         </button>
       </div>
     </form>

@@ -143,11 +143,11 @@ export default function ExecutivesAdminClient({
       {/* Cards grid */}
       {membersQuery.isLoading ? (
         <p className="text-sm text-black/50 font-jakarta py-8 text-center">
-          Memuat data...
+          Loading data...
         </p>
       ) : filtered.length === 0 ? (
         <p className="text-sm text-black/50 font-jakarta py-8 text-center">
-          Belum ada member untuk tahun ini atau tidak ditemukan dalam pencarian.
+          No members found for this year or matching the search.
         </p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -201,7 +201,7 @@ export default function ExecutivesAdminClient({
                   {m.nim}
                 </span>
                 <span className="text-black text-sm font-light font-jakarta line-clamp-1">
-                  {m.prodi} • Angkatan {m.angkatan}
+                  {m.prodi} • Batch {m.angkatan}
                 </span>
               </div>
             </div>
@@ -216,11 +216,11 @@ export default function ExecutivesAdminClient({
           setModalOpen(open);
           if (!open) setEditTarget(null);
         }}
-        title={editTarget ? "Edit Executive" : "Tambah Executive"}
+        title={editTarget ? "Edit Executive" : "Add Executive"}
         description={
           editTarget
-            ? `Edit data untuk ${editTarget.name}`
-            : "Isi data anggota executive baru"
+            ? `Edit data for ${editTarget.name}`
+            : "Fill in the new executive member's data"
         }
         maxWidth="max-w-2xl"
       >
@@ -235,10 +235,10 @@ export default function ExecutivesAdminClient({
       <AdminConfirmModal
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Hapus Executive"
-        description={`Apakah Anda yakin ingin menghapus "${deleteTarget?.name}"? Tindakan ini tidak dapat dibatalkan.`}
-        confirmText="Ya, Hapus"
-        cancelText="Batal"
+        title="Delete Executive"
+        description={`Are you sure you want to delete "${deleteTarget?.name}"? This action cannot be undone.`}
+        confirmText="Yes, Delete"
+        cancelText="Cancel"
         onConfirm={() => {
           if (deleteTarget) {
             deleteMutation.mutate({ id: deleteTarget.id });
