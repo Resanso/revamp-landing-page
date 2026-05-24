@@ -13,9 +13,7 @@ import GalleryImageForm from "./gallery-image-form";
 type GalleryImage = {
   id: number;
   year: string;
-  fileName: string;
   imageUrl: string;
-  description: string | null;
 };
 
 type Props = {
@@ -58,12 +56,11 @@ export default function GalleryAdminClient({
   );
 
   const filtered = images.filter((img) => {
-    const matchSearch =
+    return (
       !search ||
-      img.fileName.toLowerCase().includes(search.toLowerCase()) ||
-      (img.description &&
-        img.description.toLowerCase().includes(search.toLowerCase()));
-    return matchSearch;
+      img.year.toLowerCase().includes(search.toLowerCase()) ||
+      img.imageUrl.toLowerCase().includes(search.toLowerCase())
+    );
   });
 
   function openAdd() {
@@ -152,7 +149,7 @@ export default function GalleryAdminClient({
               <div className="relative aspect-video bg-gray-100 flex-shrink-0">
                 <Image
                   src={img.imageUrl}
-                  alt={img.description ?? img.fileName}
+                  alt={`Gallery photo ${img.year}`}
                   fill
                   className="object-cover"
                 />
@@ -175,16 +172,6 @@ export default function GalleryAdminClient({
                   </button>
                 </div>
               </div>
-              <div className="p-4 flex flex-col gap-2">
-                <span className="text-black text-lg font-semibold leading-tight font-jakarta line-clamp-1">
-                  {img.fileName}
-                </span>
-                {img.description && (
-                  <span className="text-black text-sm font-light font-jakarta line-clamp-2">
-                    {img.description}
-                  </span>
-                )}
-              </div>
             </div>
           ))}
         </div>
@@ -200,7 +187,7 @@ export default function GalleryAdminClient({
         title={editTarget ? "Edit Foto" : "Tambah Foto"}
         description={
           editTarget
-            ? `Edit data untuk ${editTarget.fileName}`
+            ? `Edit foto tahun ${editTarget.year}`
             : "Upload foto baru ke galeri"
         }
         maxWidth="max-w-2xl"
@@ -217,7 +204,7 @@ export default function GalleryAdminClient({
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
         title="Hapus Foto"
-        description={`Apakah Anda yakin ingin menghapus "${deleteTarget?.fileName}"? Tindakan ini tidak dapat dibatalkan.`}
+        description={`Apakah Anda yakin ingin menghapus foto tahun "${deleteTarget?.year}"? Tindakan ini tidak dapat dibatalkan.`}
         confirmText="Ya, Hapus"
         cancelText="Batal"
         onConfirm={() => {

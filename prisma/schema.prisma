@@ -60,9 +60,7 @@ model HallOfFame {
 model GalleryImage {
   id          Int      @id @default(autoincrement())
   year        String // E.g., "2025"
-  fileName    String
   imageUrl    String
-  description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
