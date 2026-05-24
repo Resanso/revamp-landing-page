@@ -6,7 +6,7 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  return { user };
+  return { supabase, user };
 };
 
 const t = initTRPC

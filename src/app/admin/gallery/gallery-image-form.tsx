@@ -19,9 +19,10 @@ type InitialData = {
 
 type Props = {
   initial?: InitialData;
+  onSuccess?: () => void;
 };
 
-export default function GalleryImageForm({ initial }: Props) {
+export default function GalleryImageForm({ initial, onSuccess }: Props) {
   const router = useRouter();
   const trpc = useTRPC();
 
@@ -37,13 +38,19 @@ export default function GalleryImageForm({ initial }: Props) {
 
   const createMutation = useMutation(
     trpc.gallery.create.mutationOptions({
-      onSuccess: () => router.push("/admin/gallery"),
+      onSuccess: () => {
+        if (onSuccess) onSuccess();
+        else router.push("/admin/gallery");
+      },
     }),
   );
 
   const updateMutation = useMutation(
     trpc.gallery.update.mutationOptions({
-      onSuccess: () => router.push("/admin/gallery"),
+      onSuccess: () => {
+        if (onSuccess) onSuccess();
+        else router.push("/admin/gallery");
+      },
     }),
   );
 
@@ -216,7 +223,10 @@ export default function GalleryImageForm({ initial }: Props) {
         </button>
         <button
           type="button"
-          onClick={() => router.push("/admin/gallery")}
+          onClick={() => {
+            if (onSuccess) onSuccess();
+            else router.push("/admin/gallery");
+          }}
           className="border border-black/20 px-6 py-2 text-sm font-medium transition hover:bg-black/5"
         >
           Batal

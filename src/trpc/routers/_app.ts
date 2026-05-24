@@ -1,5 +1,6 @@
 import { createTRPCRouter } from "../init";
 import { activitiesRouter } from "./activities";
+import { authRouter } from "./auth";
 import { contentCategoriesRouter } from "./content-categories";
 import { hallOfFameRouter } from "./hall-of-fame";
 import { homeRouter } from "./home";
@@ -8,6 +9,7 @@ import { galleryRouter } from "./gallery";
 import { competitionRouter } from "./competition";
 
 export const appRouter = createTRPCRouter({
+  auth: authRouter,
   home: homeRouter,
   hallOfFame: hallOfFameRouter,
   activities: activitiesRouter,

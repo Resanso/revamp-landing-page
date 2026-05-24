@@ -4,10 +4,11 @@ import { useRouter } from "next/navigation";
 import { useTRPC } from "@/trpc/client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Image from "next/image";
-import Link from "next/link";
 import { useState } from "react";
-import { Search, Edit2, Trash2 } from "lucide-react";
+import { Search, Edit2, Trash2, UserPlus } from "lucide-react";
 import { AdminConfirmModal } from "@/components/admin/ui/admin-confirm-modal";
+import { AdminModal } from "@/components/admin/ui/admin-modal";
+import ExecutiveMemberForm from "./executive-member-form";
 
 type Member = {
   id: number;
@@ -38,10 +39,13 @@ export default function ExecutivesAdminClient({
   const [activeYear, setActiveYear] = useState(initialYear);
   const [search, setSearch] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<Member | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<Member | null>(null);
 
   const membersQuery = useQuery(
     trpc.executives.getAll.queryOptions({ year: activeYear, limit: 100 }),
   );
+  
   const members =
     membersQuery.data?.members ??
     (activeYear === initialYear ? initialMembers : []);
@@ -68,6 +72,24 @@ export default function ExecutivesAdminClient({
       m.prodi.toLowerCase().includes(search.toLowerCase());
     return matchSearch;
   });
+
+  function openAdd() {
+    setEditTarget(null);
+    setModalOpen(true);
+  }
+
+  function openEdit(m: Member) {
+    setEditTarget(m);
+    setModalOpen(true);
+  }
+
+  function handleModalSuccess() {
+    setModalOpen(false);
+    setEditTarget(null);
+    membersQuery.refetch();
+    yearsQuery.refetch();
+    router.refresh();
+  }
 
   return (
     <div className="bg-white rounded-lg border border-[#D9D9D9] px-8 py-8 flex flex-col gap-6">
@@ -108,12 +130,14 @@ export default function ExecutivesAdminClient({
             className="bg-transparent text-base font-medium font-jakarta text-black outline-none placeholder:text-[#A9A9A9] w-full"
           />
         </div>
-        <Link
-          href="/admin/executives/new"
-          className="bg-[#FFC917] px-10 py-3.5 rounded-lg text-black text-base font-medium font-jakarta hover:bg-[#ffb901] transition-colors whitespace-nowrap"
+        <button
+          type="button"
+          onClick={openAdd}
+          className="flex items-center gap-2 bg-[#FFC917] px-10 py-3.5 rounded-lg text-black text-base font-medium font-jakarta hover:bg-[#ffb901] transition-colors whitespace-nowrap"
         >
+          <UserPlus className="w-4 h-4" />
           Add Executive
-        </Link>
+        </button>
       </div>
 
       {/* Cards grid */}
@@ -146,19 +170,20 @@ export default function ExecutivesAdminClient({
                   </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
-                
+
                 {/* Position badge */}
                 <span className="absolute left-4 top-4 bg-[#FFC917] px-3 py-1 rounded text-xs font-bold uppercase tracking-wide text-black">
                   {m.position}
                 </span>
 
                 <div className="absolute top-4 right-4 flex gap-2">
-                  <Link
-                    href={`/admin/executives/${m.id}`}
+                  <button
+                    type="button"
+                    onClick={() => openEdit(m)}
                     className="p-2 bg-[#F9FAFB] rounded flex items-center justify-center hover:bg-gray-100 transition-colors"
                   >
                     <Edit2 className="w-4 h-4 text-[#A7A7A7]" />
-                  </Link>
+                  </button>
                   <button
                     type="button"
                     onClick={() => setDeleteTarget(m)}
@@ -183,6 +208,28 @@ export default function ExecutivesAdminClient({
           ))}
         </div>
       )}
+
+      {/* Add / Edit Modal */}
+      <AdminModal
+        open={modalOpen}
+        onOpenChange={(open) => {
+          setModalOpen(open);
+          if (!open) setEditTarget(null);
+        }}
+        title={editTarget ? "Edit Executive" : "Tambah Executive"}
+        description={
+          editTarget
+            ? `Edit data untuk ${editTarget.name}`
+            : "Isi data anggota executive baru"
+        }
+        maxWidth="max-w-2xl"
+      >
+        <ExecutiveMemberForm
+          key={editTarget?.id ?? "new"}
+          initial={editTarget ?? undefined}
+          onSuccess={handleModalSuccess}
+        />
+      </AdminModal>
 
       {/* Delete Confirm */}
       <AdminConfirmModal
