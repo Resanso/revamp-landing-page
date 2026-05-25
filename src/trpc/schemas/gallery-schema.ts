@@ -18,3 +18,8 @@ export const galleryImageGetAllSchema = z
     limit: z.number().int().min(1).max(100).default(30),
   })
   .optional();
+
+export const galleryImageIdSchema = z.object({
+  id: z.number().int().positive(),
+});
+

@@ -49,3 +49,12 @@ export const getAllSchema = z
     cursor: z.number().int().positive().optional(),
   })
   .optional();
+
+export const hallOfFameGetByYearSchema = z.object({
+  year: z.string(),
+});
+
+export const hallOfFameIdSchema = z.object({
+  id: z.number(),
+});
+

@@ -1,17 +1,12 @@
-import { z } from "zod";
 import { adminProcedure, baseProcedure, createTRPCRouter } from "../init";
 import prisma from "@/lib/prisma";
 import { TRPCError } from "@trpc/server";
 import { createServiceRoleClient } from "@/lib/supabase/server";
+import { loginSchema, registerSchema } from "@/trpc/schemas/auth-schema";
 
 export const authRouter = createTRPCRouter({
   login: baseProcedure
-    .input(
-      z.object({
-        nim: z.string().min(1, "NIM tidak boleh kosong"),
-        password: z.string().min(1, "Password tidak boleh kosong"),
-      }),
-    )
+    .input(loginSchema)
     .mutation(async ({ input, ctx }) => {
       const { nim, password } = input;
 
@@ -57,18 +52,7 @@ export const authRouter = createTRPCRouter({
   }),
 
   register: adminProcedure
-    .input(
-      z.object({
-        nim: z.string().min(1, "NIM tidak boleh kosong"),
-        name: z.string().min(1, "Nama tidak boleh kosong"),
-        email: z.email("Format email tidak valid"),
-        password: z
-          .string()
-          .min(8, "Password minimal 8 karakter")
-          .regex(/[A-Z]/, "Password harus mengandung huruf kapital")
-          .regex(/[0-9]/, "Password harus mengandung angka"),
-      }),
-    )
+    .input(registerSchema)
     .mutation(async ({ input }) => {
       const { nim, name, email, password } = input;
 
@@ -91,6 +75,9 @@ export const authRouter = createTRPCRouter({
           email,
           password,
           email_confirm: true,
+          user_metadata: {
+            display_name: name,
+          },
         });
 
       if (authError || !authData.user) {

@@ -1,6 +1,11 @@
-import { z } from "zod";
 import { adminProcedure, baseProcedure, createTRPCRouter } from "../init";
-import { getAllSchema } from "@/trpc/schemas/hallOfFame-schema";
+import {
+  getAllSchema,
+  hallOfFameCreateSchema,
+  hallOfFameUpdateSchema,
+  hallOfFameGetByYearSchema,
+  hallOfFameIdSchema,
+} from "@/trpc/schemas/hallOfFame-schema";
 import prisma from "@/lib/prisma";
 import { Prisma } from "../../../generated/prisma/client";
 import { TRPCError } from "@trpc/server";
@@ -55,7 +60,7 @@ export const hallOfFameRouter = createTRPCRouter({
   }),
 
   getByYear: baseProcedure
-    .input(z.object({ year: z.string() }))
+    .input(hallOfFameGetByYearSchema)
     .query(({ input }) =>
       prisma.hallOfFame.findMany({
         where: { year: input.year },
@@ -64,7 +69,7 @@ export const hallOfFameRouter = createTRPCRouter({
     ),
 
   getById: baseProcedure
-    .input(z.object({ id: z.number() }))
+    .input(hallOfFameIdSchema)
     .query(async ({ input }) => {
       const entry = await prisma.hallOfFame.findUnique({
         where: { id: input.id },
@@ -81,33 +86,18 @@ export const hallOfFameRouter = createTRPCRouter({
     }),
 
   create: adminProcedure
-    .input(
-      z.object({
-        year: z.string().min(4),
-        title: z.string().min(1),
-        competition: z.string().min(1),
-        image: z.string().min(1),
-      }),
-    )
+    .input(hallOfFameCreateSchema)
     .mutation(({ input }) => prisma.hallOfFame.create({ data: input })),
 
   update: adminProcedure
-    .input(
-      z.object({
-        id: z.number(),
-        year: z.string().min(4),
-        title: z.string().min(1),
-        competition: z.string().min(1),
-        image: z.string().min(1),
-      }),
-    )
+    .input(hallOfFameUpdateSchema)
     .mutation(({ input }) => {
       const { id, ...data } = input;
       return prisma.hallOfFame.update({ where: { id }, data });
     }),
 
   delete: adminProcedure
-    .input(z.object({ id: z.number() }))
+    .input(hallOfFameIdSchema)
     .mutation(({ input }) =>
       prisma.hallOfFame.delete({ where: { id: input.id } }),
     ),

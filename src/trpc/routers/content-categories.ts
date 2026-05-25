@@ -1,6 +1,9 @@
-import { z } from "zod";
 import { adminProcedure, baseProcedure, createTRPCRouter } from "../init";
 import prisma from "@/lib/prisma";
+import {
+  contentCategoryCreateSchema,
+  contentCategoryDeleteSchema,
+} from "@/trpc/schemas/content-categories-schema";
 
 export const contentCategoriesRouter = createTRPCRouter({
   list: baseProcedure.query(() =>
@@ -8,7 +11,7 @@ export const contentCategoriesRouter = createTRPCRouter({
   ),
 
   create: adminProcedure
-    .input(z.object({ name: z.string().min(1).max(50) }))
+    .input(contentCategoryCreateSchema)
     .mutation(async ({ input }) => {
       const last = await prisma.contentCategory.findFirst({ orderBy: { order: "desc" } });
       return prisma.contentCategory.create({
@@ -17,7 +20,7 @@ export const contentCategoriesRouter = createTRPCRouter({
     }),
 
   delete: adminProcedure
-    .input(z.object({ id: z.string() }))
+    .input(contentCategoryDeleteSchema)
     .mutation(({ input }) =>
       prisma.contentCategory.delete({ where: { id: input.id } }),
     ),

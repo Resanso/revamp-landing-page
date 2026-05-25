@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { adminProcedure, baseProcedure, createTRPCRouter } from "../init";
 import prisma from "@/lib/prisma";
 import type { Prisma } from "../../../generated/prisma/client";
@@ -7,6 +6,7 @@ import {
   executiveMemberCreateSchema,
   executiveMemberUpdateSchema,
   executiveMemberGetAllSchema,
+  executiveMemberIdSchema,
 } from "@/trpc/schemas/executive-schema";
 
 export const executivesRouter = createTRPCRouter({
@@ -64,7 +64,7 @@ export const executivesRouter = createTRPCRouter({
 
   // Ambil satu member by ID
   getById: baseProcedure
-    .input(z.object({ id: z.number().int().positive() }))
+    .input(executiveMemberIdSchema)
     .query(async ({ input }) => {
       const member = await prisma.executiveMember.findUnique({
         where: { id: input.id },
@@ -112,7 +112,7 @@ export const executivesRouter = createTRPCRouter({
 
   // Hapus member (admin only)
   delete: adminProcedure
-    .input(z.object({ id: z.number().int().positive() }))
+    .input(executiveMemberIdSchema)
     .mutation(async ({ input }) => {
       const existing = await prisma.executiveMember.findUnique({
         where: { id: input.id },

@@ -16,10 +16,10 @@ export default function AddAdminPage() {
           <ArrowLeft className="w-4 h-4" />
           Kembali ke Admin Management
         </Link>
-        <h1 className="text-black text-5xl font-bold leading-tight font-jakarta break-words">
+        <h1 className="text-black text-5xl font-bold leading-tight font-jakarta wrap-break-word">
           Tambah Admin
         </h1>
-        <p className="text-black text-sm font-normal leading-tight font-jakarta break-words">
+        <p className="text-black text-sm font-normal leading-tight font-jakarta wrap-break-word">
           Buat akun admin baru yang dapat mengakses dashboard ini
         </p>
       </div>

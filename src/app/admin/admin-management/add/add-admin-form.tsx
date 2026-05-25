@@ -23,10 +23,14 @@ export default function AddAdminForm() {
   const registerMutation = useMutation(
     trpc.auth.register.mutationOptions({
       onSuccess: (data) => {
-        setSuccess(
-          `Admin "${data.profile.name}" berhasil ditambahkan!`
-        );
-        setForm({ nim: "", name: "", email: "", password: "", showPassword: false });
+        setSuccess(`Admin "${data.profile.name}" berhasil ditambahkan!`);
+        setForm({
+          nim: "",
+          name: "",
+          email: "",
+          password: "",
+          showPassword: false,
+        });
         setTimeout(() => {
           router.push("/admin/admin-management");
           router.refresh();
@@ -35,14 +39,19 @@ export default function AddAdminForm() {
       onError: (err) => {
         setError(err.message);
       },
-    })
+    }),
   );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
-    registerMutation.mutate({ nim: form.nim, name: form.name, email: form.email, password: form.password });
+    registerMutation.mutate({
+      nim: form.nim,
+      name: form.name,
+      email: form.email,
+      password: form.password,
+    });
   };
 
   return (
@@ -61,9 +70,11 @@ export default function AddAdminForm() {
             type="text"
             required
             value={form.name}
-            onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, name: e.target.value }))
+            }
             placeholder="Budi Santoso"
-            className="w-full bg-[#f6f6f6] rounded-[8px] pl-11 pr-4 py-4 text-base font-jakarta text-[#191c1e] placeholder:text-[rgba(110,121,128,0.6)] outline-none focus:ring-2 focus:ring-[#FFC917]/40"
+            className="w-full bg-[#f6f6f6] rounded-lg pl-11 pr-4 py-4 text-base font-jakarta text-[#191c1e] placeholder:text-[rgba(110,121,128,0.6)] outline-none focus:ring-2 focus:ring-[#FFC917]/40"
           />
         </div>
       </div>
@@ -82,9 +93,11 @@ export default function AddAdminForm() {
             type="text"
             required
             value={form.nim}
-            onChange={(e) => setForm((prev) => ({ ...prev, nim: e.target.value }))}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, nim: e.target.value }))
+            }
             placeholder="103012001212"
-            className="w-full bg-[#f6f6f6] rounded-[8px] pl-11 pr-4 py-4 text-base font-jakarta text-[#191c1e] placeholder:text-[rgba(110,121,128,0.6)] outline-none focus:ring-2 focus:ring-[#FFC917]/40"
+            className="w-full bg-[#f6f6f6] rounded-lg pl-11 pr-4 py-4 text-base font-jakarta text-[#191c1e] placeholder:text-[rgba(110,121,128,0.6)] outline-none focus:ring-2 focus:ring-[#FFC917]/40"
           />
         </div>
       </div>
@@ -103,9 +116,11 @@ export default function AddAdminForm() {
             type="email"
             required
             value={form.email}
-            onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, email: e.target.value }))
+            }
             placeholder="budi@example.com"
-            className="w-full bg-[#f6f6f6] rounded-[8px] pl-11 pr-4 py-4 text-base font-jakarta text-[#191c1e] placeholder:text-[rgba(110,121,128,0.6)] outline-none focus:ring-2 focus:ring-[#FFC917]/40"
+            className="w-full bg-[#f6f6f6] rounded-lg pl-11 pr-4 py-4 text-base font-jakarta text-[#191c1e] placeholder:text-[rgba(110,121,128,0.6)] outline-none focus:ring-2 focus:ring-[#FFC917]/40"
           />
         </div>
       </div>
@@ -124,13 +139,17 @@ export default function AddAdminForm() {
             type={form.showPassword ? "text" : "password"}
             required
             value={form.password}
-            onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, password: e.target.value }))
+            }
             placeholder="Min. 8 karakter, huruf kapital & angka"
-            className="w-full bg-[#f6f6f6] rounded-[8px] pl-11 pr-12 py-4 text-base font-jakarta text-[#191c1e] placeholder:text-[rgba(110,121,128,0.6)] outline-none focus:ring-2 focus:ring-[#FFC917]/40"
+            className="w-full bg-[#f6f6f6] rounded-lg pl-11 pr-12 py-4 text-base font-jakarta text-[#191c1e] placeholder:text-[rgba(110,121,128,0.6)] outline-none focus:ring-2 focus:ring-[#FFC917]/40"
           />
           <button
             type="button"
-            onClick={() => setForm((prev) => ({ ...prev, showPassword: !prev.showPassword }))}
+            onClick={() =>
+              setForm((prev) => ({ ...prev, showPassword: !prev.showPassword }))
+            }
             className="absolute right-0 top-0 bottom-0 flex items-center pr-4 text-[#6e7980] hover:text-[#191c1e] transition-colors"
           >
             {form.showPassword ? (
@@ -163,7 +182,7 @@ export default function AddAdminForm() {
       <button
         type="submit"
         disabled={registerMutation.isPending}
-        className="w-full bg-[#FFC917] hover:bg-[#ffb901] rounded-[8px] py-4 text-base font-semibold font-jakarta text-white transition-colors disabled:opacity-60"
+        className="w-full bg-[#FFC917] hover:bg-[#ffb901] rounded-lg py-4 text-base font-semibold font-jakarta text-white transition-colors disabled:opacity-60"
       >
         {registerMutation.isPending ? "Menambahkan..." : "Tambah Admin"}
       </button>
