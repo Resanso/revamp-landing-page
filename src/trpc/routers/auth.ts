@@ -108,7 +108,7 @@ export const authRouter = createTRPCRouter({
             email: profile.email,
           },
         };
-      } catch (dbError) {
+      } catch {
         await supabaseAdmin.auth.admin.deleteUser(supabaseUserId);
 
         throw new TRPCError({
