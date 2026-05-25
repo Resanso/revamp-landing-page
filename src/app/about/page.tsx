@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { ArrowRight2 } from "iconsax-react";
-import { aboutSlides } from "@/data/about-content";
 import AboutGalleryClient from "@/components/about/AboutGalleryClient";
 import AboutVision from "@/components/about/AboutVision";
 import AboutMission from "@/components/about/AboutMission";
+import { getCaller } from "@/trpc/server";
 
 export const metadata = {
   title: "About | Prodigi",
@@ -12,6 +12,10 @@ export const metadata = {
 };
 
 export default async function AboutPage() {
+  const caller = await getCaller();
+  const dbSlides = await caller.about.getAll();
+  const slides = dbSlides.map((s) => ({ src: s.imageUrl, alt: "About Prodigi" }));
+
   return (
     <main className="min-h-screen w-full pt-14 pb-0 flex flex-col gap-16 md:gap-30 mb-16 md:mb-24">
       <div className="mx-auto w-full max-w-6xl px-4 md:px-8">
@@ -36,7 +40,7 @@ export default async function AboutPage() {
           </p>
         </div>
 
-        <AboutGalleryClient slides={aboutSlides} />
+        <AboutGalleryClient slides={slides} />
       </div>
 
       <AboutVision />
@@ -45,3 +49,4 @@ export default async function AboutPage() {
     </main>
   );
 }
+

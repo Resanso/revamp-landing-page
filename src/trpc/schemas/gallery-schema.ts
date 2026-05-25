@@ -15,7 +15,7 @@ export const galleryImageGetAllSchema = z
   .object({
     year: z.string().regex(/^\d{4}$/).optional(),
     page: z.number().int().min(1).default(1),
-    limit: z.number().int().min(1).max(100).default(30),
+    limit: z.number().int().min(1).max(500).default(30),
   })
   .optional();
 

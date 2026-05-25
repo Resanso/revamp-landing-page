@@ -7,9 +7,11 @@ import { homeRouter } from "./home";
 import { executivesRouter } from "./executives";
 import { galleryRouter } from "./gallery";
 import { competitionRouter } from "./competition";
+import { aboutRouter } from "./about";
 
 export const appRouter = createTRPCRouter({
   auth: authRouter,
+  about: aboutRouter,
   home: homeRouter,
   hallOfFame: hallOfFameRouter,
   activities: activitiesRouter,
