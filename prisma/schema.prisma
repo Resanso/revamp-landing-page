@@ -104,6 +104,8 @@ model Department {
   updatedAt   DateTime @updatedAt
 }
 
+// Singleton (id is always 1) holding destination links for the
+// competition section displayed on the public website.
 model Competition {
   id         Int      @id @default(1)
   gemastik   String   @default("")
