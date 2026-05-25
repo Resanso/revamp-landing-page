@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { adminProcedure, baseProcedure, createTRPCRouter } from "../init";
 import prisma from "@/lib/prisma";
 import { TRPCError } from "@trpc/server";
@@ -6,6 +5,7 @@ import {
   galleryImageCreateSchema,
   galleryImageUpdateSchema,
   galleryImageGetAllSchema,
+  galleryImageIdSchema,
 } from "@/trpc/schemas/gallery-schema";
 
 export const galleryRouter = createTRPCRouter({
@@ -53,7 +53,7 @@ export const galleryRouter = createTRPCRouter({
 
   // Ambil satu gambar by ID
   getById: baseProcedure
-    .input(z.object({ id: z.number().int().positive() }))
+    .input(galleryImageIdSchema)
     .query(async ({ input }) => {
       const image = await prisma.galleryImage.findUnique({
         where: { id: input.id },
@@ -89,7 +89,7 @@ export const galleryRouter = createTRPCRouter({
 
   // Hapus gambar (admin only)
   delete: adminProcedure
-    .input(z.object({ id: z.number().int().positive() }))
+    .input(galleryImageIdSchema)
     .mutation(async ({ input }) => {
       const existing = await prisma.galleryImage.findUnique({
         where: { id: input.id },

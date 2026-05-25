@@ -24,9 +24,10 @@ type InitialData = {
 
 type Props = {
   initial?: InitialData;
+  onSuccess?: () => void;
 };
 
-export default function ExecutiveMemberForm({ initial }: Props) {
+export default function ExecutiveMemberForm({ initial, onSuccess }: Props) {
   const router = useRouter();
   const trpc = useTRPC();
 
@@ -41,19 +42,26 @@ export default function ExecutiveMemberForm({ initial }: Props) {
     instagram: initial?.instagram ?? "",
     image: initial?.image ?? "",
   });
+
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const createMutation = useMutation(
     trpc.executives.create.mutationOptions({
-      onSuccess: () => router.push("/admin/executives"),
+      onSuccess: () => {
+        if (onSuccess) onSuccess();
+        else router.push("/admin/executives");
+      },
     }),
   );
 
   const updateMutation = useMutation(
     trpc.executives.update.mutationOptions({
-      onSuccess: () => router.push("/admin/executives"),
+      onSuccess: () => {
+        if (onSuccess) onSuccess();
+        else router.push("/admin/executives");
+      },
     }),
   );
 
@@ -73,7 +81,7 @@ export default function ExecutiveMemberForm({ initial }: Props) {
         .getPublicUrl(data.path);
       setForm((prev) => ({ ...prev, image: urlData.publicUrl }));
     } catch {
-      setError("Gagal upload gambar. Coba lagi.");
+      setError("Failed to upload image. Please try again.");
     } finally {
       setUploading(false);
     }
@@ -85,7 +93,7 @@ export default function ExecutiveMemberForm({ initial }: Props) {
     setFieldErrors({});
 
     if (!form.image) {
-      setError("Foto wajib diupload.");
+      setError("A photo is required.");
       return;
     }
 
@@ -107,7 +115,7 @@ export default function ExecutiveMemberForm({ initial }: Props) {
         setFieldErrors(parsedErrors);
       } else {
         if (err instanceof Error) setError(err.message);
-        else setError("Terjadi kesalahan. Coba lagi.");
+        else setError("An error occurred. Please try again.");
       }
     }
   };
@@ -124,14 +132,21 @@ export default function ExecutiveMemberForm({ initial }: Props) {
 
       {/* Foto Preview */}
       <div>
-        <label className="mb-2 block text-sm font-medium">Foto Member *</label>
+        <label className="mb-2 block text-sm font-medium">Member Photo *</label>
 
         <label className="cursor-pointer block max-w-xs">
           {form.image ? (
             <div className="relative w-full aspect-square rounded-lg overflow-hidden border border-[#D9D9D9]">
-              <Image src={form.image} alt="Preview foto member" fill className="object-cover object-top" />
+              <Image
+                src={form.image}
+                alt="Member photo preview"
+                fill
+                className="object-cover object-top"
+              />
               <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                <span className="text-white text-sm font-jakarta font-medium">Change photo</span>
+                <span className="text-white text-sm font-jakarta font-medium">
+                  Change photo
+                </span>
               </div>
             </div>
           ) : (
@@ -140,22 +155,33 @@ export default function ExecutiveMemberForm({ initial }: Props) {
                 <Camera className="w-6 h-6 text-[#FFC917]" />
               </div>
               <div className="text-center px-4">
-                <p className="text-black font-medium text-sm font-jakarta">Drag &amp; drop image here</p>
-                <p className="text-[#A9A9A9] text-xs font-jakarta mt-1">Supported only JPG and PNG</p>
+                <p className="text-black font-medium text-sm font-jakarta">
+                  Drag &amp; drop image here
+                </p>
+                <p className="text-[#A9A9A9] text-xs font-jakarta mt-1">
+                  Supported only JPG and PNG
+                </p>
               </div>
             </div>
           )}
-          <input type="file" accept="image/jpeg,image/png" onChange={handleImageUpload} className="hidden" />
+          <input
+            type="file"
+            accept="image/jpeg,image/png"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
         </label>
         {uploading && (
-          <p className="mt-2 text-xs text-black/50 font-jakarta">Mengupload...</p>
+          <p className="mt-2 text-xs text-black/50 font-jakarta">
+            Uploading...
+          </p>
         )}
       </div>
 
-      {/* Tahun & Angkatan */}
+      {/* Year & Batch */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="mb-1 block text-sm font-medium">Tahun *</label>
+          <label className="mb-1 block text-sm font-medium">Year *</label>
           <input
             type="text"
             required
@@ -169,7 +195,7 @@ export default function ExecutiveMemberForm({ initial }: Props) {
           )}
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium">Angkatan *</label>
+          <label className="mb-1 block text-sm font-medium">Batch Year *</label>
           <input
             type="text"
             required
@@ -184,9 +210,9 @@ export default function ExecutiveMemberForm({ initial }: Props) {
         </div>
       </div>
 
-      {/* Nama */}
+      {/* Full Name */}
       <div>
-        <label className="mb-1 block text-sm font-medium">Nama Lengkap *</label>
+        <label className="mb-1 block text-sm font-medium">Full Name *</label>
         <input
           type="text"
           required
@@ -216,10 +242,10 @@ export default function ExecutiveMemberForm({ initial }: Props) {
         )}
       </div>
 
-      {/* Program Studi */}
+      {/* Study Program */}
       <div>
         <label className="mb-1 block text-sm font-medium">
-          Program Studi *
+          Study Program *
         </label>
         <input
           type="text"
@@ -234,9 +260,9 @@ export default function ExecutiveMemberForm({ initial }: Props) {
         )}
       </div>
 
-      {/* Jabatan */}
+      {/* Position */}
       <div>
-        <label className="mb-1 block text-sm font-medium">Jabatan *</label>
+        <label className="mb-1 block text-sm font-medium">Position *</label>
         <input
           type="text"
           required
@@ -253,7 +279,7 @@ export default function ExecutiveMemberForm({ initial }: Props) {
       {/* LinkedIn */}
       <div>
         <label className="mb-1 block text-sm font-medium">
-          LinkedIn <span className="text-black/40">(opsional)</span>
+          LinkedIn <span className="text-black/40">(optional)</span>
         </label>
         <input
           type="text"
@@ -270,7 +296,7 @@ export default function ExecutiveMemberForm({ initial }: Props) {
       {/* Instagram */}
       <div>
         <label className="mb-1 block text-sm font-medium">
-          Instagram <span className="text-black/40">(opsional)</span>
+          Instagram <span className="text-black/40">(optional)</span>
         </label>
         <input
           type="text"
@@ -292,17 +318,20 @@ export default function ExecutiveMemberForm({ initial }: Props) {
           className="bg-[#ffc91f] px-6 py-2 text-sm font-semibold text-black transition hover:bg-[#ffb901] disabled:opacity-60"
         >
           {isPending
-            ? "Menyimpan..."
+            ? "Saving..."
             : initial
-              ? "Simpan Perubahan"
-              : "Tambah Member"}
+              ? "Save Changes"
+              : "Add Member"}
         </button>
         <button
           type="button"
-          onClick={() => router.push("/admin/executives")}
+          onClick={() => {
+            if (onSuccess) onSuccess();
+            else router.push("/admin/executives");
+          }}
           className="border border-black/20 px-6 py-2 text-sm font-medium transition hover:bg-black/5"
         >
-          Batal
+          Cancel
         </button>
       </div>
     </form>

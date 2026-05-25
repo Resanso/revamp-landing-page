@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { Home, Info, Users, Medal, CalendarDays, Trophy, ChevronDown } from "lucide-react";
+import { Home, Info, Users, Medal, CalendarDays, Trophy, ChevronDown, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
@@ -20,6 +20,7 @@ const navItems = [
   { label: "Hall of Fame", href: "/admin/hall-of-fame", Icon: Medal },
   { label: "Activities", href: "/admin/activities", Icon: CalendarDays },
   { label: "Competition", href: "/admin/competition", Icon: Trophy },
+  { label: "Admin Management", href: "/admin/admin-management", Icon: ShieldCheck },
 ];
 
 export default function Sidebar() {

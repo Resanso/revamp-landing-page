@@ -5,16 +5,15 @@ import { useRouter } from "next/navigation";
 import { useTRPC } from "@/trpc/client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Image from "next/image";
-import Link from "next/link";
-import { Search, Edit2, Trash2 } from "lucide-react";
+import { Search, Edit2, Trash2, ImagePlus } from "lucide-react";
 import { AdminConfirmModal } from "@/components/admin/ui/admin-confirm-modal";
+import { AdminModal } from "@/components/admin/ui/admin-modal";
+import GalleryImageForm from "./gallery-image-form";
 
 type GalleryImage = {
   id: number;
   year: string;
-  fileName: string;
   imageUrl: string;
-  description: string | null;
 };
 
 type Props = {
@@ -33,6 +32,8 @@ export default function GalleryAdminClient({
   const [activeYear, setActiveYear] = useState(initialYear);
   const [search, setSearch] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<GalleryImage | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<GalleryImage | null>(null);
 
   const imagesQuery = useQuery(
     trpc.gallery.getAll.queryOptions({ year: activeYear, limit: 100 }),
@@ -55,12 +56,30 @@ export default function GalleryAdminClient({
   );
 
   const filtered = images.filter((img) => {
-    const matchSearch =
+    return (
       !search ||
-      img.fileName.toLowerCase().includes(search.toLowerCase()) ||
-      (img.description && img.description.toLowerCase().includes(search.toLowerCase()));
-    return matchSearch;
+      img.year.toLowerCase().includes(search.toLowerCase()) ||
+      img.imageUrl.toLowerCase().includes(search.toLowerCase())
+    );
   });
+
+  function openAdd() {
+    setEditTarget(null);
+    setModalOpen(true);
+  }
+
+  function openEdit(img: GalleryImage) {
+    setEditTarget(img);
+    setModalOpen(true);
+  }
+
+  function handleModalSuccess() {
+    setModalOpen(false);
+    setEditTarget(null);
+    imagesQuery.refetch();
+    yearsQuery.refetch();
+    router.refresh();
+  }
 
   return (
     <div className="bg-white rounded-lg border border-[#D9D9D9] px-8 py-8 flex flex-col gap-6">
@@ -101,22 +120,24 @@ export default function GalleryAdminClient({
             className="bg-transparent text-base font-medium font-jakarta text-black outline-none placeholder:text-[#A9A9A9] w-full"
           />
         </div>
-        <Link
-          href="/admin/gallery/new"
-          className="bg-[#FFC917] px-10 py-3.5 rounded-lg text-black text-base font-medium font-jakarta hover:bg-[#ffb901] transition-colors whitespace-nowrap"
+        <button
+          type="button"
+          onClick={openAdd}
+          className="flex items-center gap-2 bg-[#FFC917] px-10 py-3.5 rounded-lg text-black text-base font-medium font-jakarta hover:bg-[#ffb901] transition-colors whitespace-nowrap"
         >
+          <ImagePlus className="w-4 h-4" />
           Add Photo
-        </Link>
+        </button>
       </div>
 
       {/* Cards grid */}
       {imagesQuery.isLoading ? (
         <p className="text-sm text-black/50 font-jakarta py-8 text-center">
-          Memuat data...
+          Loading data...
         </p>
       ) : filtered.length === 0 ? (
         <p className="text-sm text-black/50 font-jakarta py-8 text-center">
-          Belum ada foto untuk tahun ini atau tidak ditemukan dalam pencarian.
+          No photos found for this year or matching the search.
         </p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -128,19 +149,20 @@ export default function GalleryAdminClient({
               <div className="relative aspect-video bg-gray-100 flex-shrink-0">
                 <Image
                   src={img.imageUrl}
-                  alt={img.description ?? img.fileName}
+                  alt={`Gallery photo ${img.year}`}
                   fill
                   className="object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
 
                 <div className="absolute top-4 right-4 flex gap-2">
-                  <Link
-                    href={`/admin/gallery/${img.id}`}
+                  <button
+                    type="button"
+                    onClick={() => openEdit(img)}
                     className="p-2 bg-[#F9FAFB] rounded flex items-center justify-center hover:bg-gray-100 transition-colors"
                   >
                     <Edit2 className="w-4 h-4 text-[#A7A7A7]" />
-                  </Link>
+                  </button>
                   <button
                     type="button"
                     onClick={() => setDeleteTarget(img)}
@@ -150,29 +172,41 @@ export default function GalleryAdminClient({
                   </button>
                 </div>
               </div>
-              <div className="p-4 flex flex-col gap-2">
-                <span className="text-black text-lg font-semibold leading-tight font-jakarta line-clamp-1">
-                  {img.fileName}
-                </span>
-                {img.description && (
-                  <span className="text-black text-sm font-light font-jakarta line-clamp-2">
-                    {img.description}
-                  </span>
-                )}
-              </div>
             </div>
           ))}
         </div>
       )}
 
+      {/* Add / Edit Modal */}
+      <AdminModal
+        open={modalOpen}
+        onOpenChange={(open) => {
+          setModalOpen(open);
+          if (!open) setEditTarget(null);
+        }}
+        title={editTarget ? "Edit Photo" : "Add Photo"}
+        description={
+          editTarget
+            ? `Edit photo for year ${editTarget.year}`
+            : "Upload a new photo to the gallery"
+        }
+        maxWidth="max-w-2xl"
+      >
+        <GalleryImageForm
+          key={editTarget?.id ?? "new"}
+          initial={editTarget ?? undefined}
+          onSuccess={handleModalSuccess}
+        />
+      </AdminModal>
+
       {/* Delete Confirm */}
       <AdminConfirmModal
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Hapus Foto"
-        description={`Apakah Anda yakin ingin menghapus "${deleteTarget?.fileName}"? Tindakan ini tidak dapat dibatalkan.`}
-        confirmText="Ya, Hapus"
-        cancelText="Batal"
+        title="Delete Photo"
+        description={`Are you sure you want to delete the photo for year "${deleteTarget?.year}"? This action cannot be undone.`}
+        confirmText="Yes, Delete"
+        cancelText="Cancel"
         onConfirm={() => {
           if (deleteTarget) {
             deleteMutation.mutate({ id: deleteTarget.id });

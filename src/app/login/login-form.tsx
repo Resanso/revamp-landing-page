@@ -2,36 +2,34 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { CreditCard, Lock, Eye, EyeOff } from "lucide-react";
+import { useTRPC } from "@/trpc/client";
+import { useMutation } from "@tanstack/react-query";
 
 export default function LoginForm() {
   const router = useRouter();
+  const trpc = useTRPC();
   const [nim, setNim] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+
+  const loginMutation = useMutation(
+    trpc.auth.login.mutationOptions({
+      onSuccess: () => {
+        router.push("/admin");
+        router.refresh();
+      },
+      onError: (err) => {
+        setError(err.message);
+      },
+    }),
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setLoading(true);
-
-    const supabase = createClient();
-    const { error: authError } = await supabase.auth.signInWithPassword({
-      email: nim,
-      password,
-    });
-
-    if (authError) {
-      setError("NIM atau password salah. Silakan coba lagi.");
-      setLoading(false);
-      return;
-    }
-
-    router.push("/admin");
-    router.refresh();
+    loginMutation.mutate({ nim, password });
   };
 
   return (
@@ -92,10 +90,10 @@ export default function LoginForm() {
       {/* Submit */}
       <button
         type="submit"
-        disabled={loading}
+        disabled={loginMutation.isPending}
         className="w-full bg-[#FFC917] hover:bg-[#ffb901] rounded-[8px] py-4 text-base font-semibold font-jakarta text-white transition-colors disabled:opacity-60"
       >
-        {loading ? "Masuk..." : "Masuk"}
+        {loginMutation.isPending ? "Masuk..." : "Masuk"}
       </button>
     </form>
   );
