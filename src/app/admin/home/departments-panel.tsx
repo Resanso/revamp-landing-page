@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/client";
 
 type Dept = { id: string; title: string; description: string; img: string; order: number };
 
-export default function DepartmentsPanel({ departments }: { departments: Dept[] }) {
+export default function DepartmentsPanel({ departments, siteSetting }: { departments: Dept[]; siteSetting: { departmentsBgImage?: string | null } }) {
   const router = useRouter();
   const trpc = useTRPC();
 
@@ -20,6 +20,10 @@ export default function DepartmentsPanel({ departments }: { departments: Dept[] 
 
   const upsertMutation = useMutation(
     trpc.home.upsertDepartment.mutationOptions({ onSuccess: () => { setEditingId(null); router.refresh(); } }),
+  );
+
+  const updateSiteSettingMutation = useMutation(
+    trpc.home.upsertSiteSetting.mutationOptions({ onSuccess: () => router.refresh() }),
   );
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,9 +47,18 @@ export default function DepartmentsPanel({ departments }: { departments: Dept[] 
     <div className="bg-white rounded-lg border border-[#D9D9D9] p-8 flex flex-col gap-10">
       <div className="flex justify-between items-center">
         <h2 className="text-black text-2xl font-semibold leading-[35px] font-jakarta break-words">Departments</h2>
-        <button className="px-8 py-4 bg-[#FFC917] bg-opacity-80 rounded flex justify-center items-center">
-          <span className="text-black text-base font-bold font-jakarta break-words">Edit Background</span>
-        </button>
+        
+        <label className="px-8 py-4 bg-[#FFC917] bg-opacity-80 rounded flex justify-center items-center cursor-pointer hover:bg-opacity-100 transition-colors">
+          <span className="text-black text-base font-bold font-jakarta break-words">
+            {uploading ? "Uploading..." : "Edit Background"}
+          </span>
+          <input type="file" accept="image/*" onChange={async (e) => {
+            const url = await handleUpload(e);
+            if (url) {
+              updateSiteSettingMutation.mutate({ departmentsBgImage: url });
+            }
+          }} className="hidden" disabled={uploading} />
+        </label>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

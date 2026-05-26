@@ -16,9 +16,10 @@ type DepartmentItem = {
 
 type DepartementsProps = {
   departments: DepartmentItem[];
+  siteSetting: { departmentsBgImage?: string | null };
 };
 
-export default function Departements({ departments }: DepartementsProps) {
+export default function Departements({ departments, siteSetting }: DepartementsProps) {
   const [activeDeptId, setActiveDeptId] = useState<string | null>(null);
   const activeDepartment = departments.find((d) => d.id === activeDeptId);
 
@@ -26,7 +27,7 @@ export default function Departements({ departments }: DepartementsProps) {
     <section className="relative overflow-hidden py-16">
       <div className="absolute inset-0">
         <Image
-          src="/images/slide1.jpg"
+          src={siteSetting.departmentsBgImage || "/images/slide1.jpg"}
           alt="Campus facade"
           fill
           loading="lazy"

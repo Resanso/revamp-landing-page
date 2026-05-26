@@ -11,10 +11,12 @@ import { getCaller } from "@/trpc/server";
 
 export default async function LandingPage() {
   const caller = await getCaller();
-  const [slides, stats, departments] = await Promise.all([
+  const [slides, stats, departments, siteSetting, leaderboard] = await Promise.all([
     caller.home.getHeroSlides(),
     caller.home.getSuccessStats(),
     caller.home.getDepartments(),
+    caller.home.getSiteSetting(),
+    caller.home.getLeaderBoard(),
   ]);
 
   return (
@@ -22,9 +24,9 @@ export default async function LandingPage() {
       <Header />
       <main className="space-y-0">
         <Hero slides={slides} />
-        <SuccessStats stats={stats} />
-        <Departements departments={departments} />
-        <FindWay />
+        <SuccessStats stats={stats} siteSetting={siteSetting} />
+        <Departements departments={departments} siteSetting={siteSetting} />
+        <FindWay leads={leaderboard} />
         <Courses />
         <Updates />
         <PartnersSection />
