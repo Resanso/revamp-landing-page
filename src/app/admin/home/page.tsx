@@ -14,10 +14,12 @@ export default async function HomeAdminPage(props: {
   const tab = typeof searchParams.tab === "string" ? searchParams.tab : "all";
 
   const caller = await getCaller();
-  const [slides, stats, departments] = await Promise.all([
+  const [slides, stats, departments, siteSetting, leaderboard] = await Promise.all([
     caller.home.getHeroSlides(),
     caller.home.getSuccessStats(),
     caller.home.getDepartments(),
+    caller.home.getSiteSetting(),
+    caller.home.getLeaderBoard(),
   ]);
 
   const tabs = [
@@ -53,9 +55,9 @@ export default async function HomeAdminPage(props: {
       </div>
 
       {(tab === "all" || tab === "hero") && <HeroSlidesPanel slides={slides} />}
-      {(tab === "all" || tab === "stats") && <StatsPanel stats={stats} />}
-      {(tab === "all" || tab === "departments") && <DepartmentsPanel departments={departments} />}
-      {(tab === "all" || tab === "leaderboard") && <LeaderboardPanel />}
+      {(tab === "all" || tab === "stats") && <StatsPanel stats={stats} siteSetting={siteSetting} />}
+      {(tab === "all" || tab === "departments") && <DepartmentsPanel departments={departments} siteSetting={siteSetting} />}
+      {(tab === "all" || tab === "leaderboard") && <LeaderboardPanel leads={leaderboard} />}
     </div>
   );
 }

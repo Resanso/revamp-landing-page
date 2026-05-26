@@ -10,11 +10,7 @@ import {
   activityDeleteSchema,
 } from "@/trpc/schemas/activities-schema";
 import type { Prisma } from "../../../generated/prisma/client";
-import {
-  ACTIVITY_CATEGORIES,
-  type ActivityCategory,
-  type ActivityMeta,
-} from "@/lib/activity-types";
+import type { ActivityCategory, ActivityMeta } from "@/lib/activity-types";
 import { generateSlug } from "@/lib/utils/slug";
 import { remark } from "remark";
 import html from "remark-html";
@@ -110,8 +106,11 @@ export const activitiesRouter = createTRPCRouter({
     .input(activityGetLatestByCategorySchema)
     .query(async ({ input }) => {
       const result = {} as Record<ActivityCategory, ActivityMeta[]>;
+      const categories = await prisma.contentCategory.findMany({ orderBy: { order: "asc" } });
+      const catNames = categories.map(c => c.name);
+
       await Promise.all(
-        ACTIVITY_CATEGORIES.map(async (cat) => {
+        catNames.map(async (cat) => {
           const rows = await prisma.activity.findMany({
             where: { category: cat },
             select: {

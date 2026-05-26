@@ -1,4 +1,3 @@
-export const ACTIVITY_CATEGORIES = ["Event", "Information", "Articles"] as const;
 export type ActivityCategory = string;
 
 export type ActivityMeta = {

@@ -1,4 +1,4 @@
-import { ACTIVITY_CATEGORIES } from "@/lib/activity-types";
+
 import { getCaller } from "@/trpc/server";
 import { ArrowRight2, SearchNormal1 } from "iconsax-react";
 
@@ -25,10 +25,12 @@ export default async function ActivitiesPage({
 }: ActivitiesPageProps) {
   const params = await searchParams;
 
-  const activeCategory = ACTIVITY_CATEGORIES.includes(
-    params.category as (typeof ACTIVITY_CATEGORIES)[number],
-  )
-    ? (params.category as (typeof ACTIVITY_CATEGORIES)[number])
+  const caller = await getCaller();
+  const rawCategories = await caller.contentCategories.list();
+  const categoryTabs = ["All", ...rawCategories.map(c => c.name)];
+
+  const activeCategory = categoryTabs.includes(params.category as string) && params.category !== "All"
+    ? params.category as string
     : undefined;
 
   const searchQuery = (params.q ?? "").trim();
@@ -38,7 +40,7 @@ export default async function ActivitiesPage({
       ? Math.floor(requestedPage)
       : 1;
 
-  const caller = await getCaller();
+
   const { posts, totalCount } = await caller.activities.getAll({
     category: activeCategory,
     q: searchQuery || undefined,
@@ -57,7 +59,7 @@ export default async function ActivitiesPage({
     return `/activities${nextParams.toString() ? `?${nextParams.toString()}` : ""}`;
   };
 
-  const categoryTabs = ["All", ...ACTIVITY_CATEGORIES] as const;
+
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl px-4 py-14 md:px-8">

@@ -25,3 +25,21 @@ export const upsertDepartmentSchema = z.object({
   img: z.string().min(1),
   order: z.number().int(),
 });
+
+export const upsertSiteSettingSchema = z.object({
+  departmentsBgImage: z.string().optional(),
+  successStatImage: z.string().optional(),
+});
+
+export const upsertLeaderBoardSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(1),
+  role: z.string().min(1),
+  quote: z.string().min(1),
+  avatar: z.string().min(1),
+  order: z.number().int(),
+});
+
+export const deleteLeaderBoardSchema = z.object({
+  id: z.string(),
+});

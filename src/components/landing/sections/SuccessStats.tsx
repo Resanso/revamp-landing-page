@@ -11,6 +11,7 @@ type StatItem = {
 
 type SuccessStatsProps = {
   stats: StatItem[];
+  siteSetting: { successStatImage?: string | null };
 };
 
 const accentMap: Record<string, string> = {
@@ -18,7 +19,7 @@ const accentMap: Record<string, string> = {
   primary: "bg-[#ffc91f]",
 };
 
-export default function SuccessStats({ stats }: SuccessStatsProps) {
+export default function SuccessStats({ stats, siteSetting }: SuccessStatsProps) {
   const renderStatCard = (stat: StatItem | undefined, spanClass: string) => {
     if (!stat) return null;
 
@@ -46,8 +47,8 @@ export default function SuccessStats({ stats }: SuccessStatsProps) {
 
         <article className="card-rise overflow-hidden rounded-sm md:relative md:col-span-6 md:row-span-2 md:min-h-31.25">
           <Image
-            src="/images/adikara-play.png"
-            alt="Adikara 2025 competition"
+            src={siteSetting.successStatImage || "/images/adikara-play.png"}
+            alt="Adikara competition"
             width={1280}
             height={720}
             loading="lazy"
@@ -55,8 +56,8 @@ export default function SuccessStats({ stats }: SuccessStatsProps) {
             className="block h-auto w-full md:hidden"
           />
           <Image
-            src="/images/adikara-play.png"
-            alt="Adikara 2025 competition"
+            src={siteSetting.successStatImage || "/images/adikara-play.png"}
+            alt="Adikara competition"
             fill
             loading="lazy"
             sizes="(max-width: 768px) 100vw, 50vw"

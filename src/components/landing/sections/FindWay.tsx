@@ -5,19 +5,26 @@ import { useEffect, useState } from "react";
 
 import Image from "next/image";
 import SectionContainer from "@/components/landing/ui/SectionContainer";
-import { leadMessages } from "@/data/landing-content";
 
-export default function FindWay() {
+type LeadMessage = {
+  id: string;
+  name: string;
+  role: string;
+  quote: string;
+  avatar: string;
+};
+
+export default function FindWay({ leads = [] }: { leads?: LeadMessage[] }) {
   const [activeSlide, setActiveSlide] = useState(0);
-  const hasLeadMessages = leadMessages.length > 0;
+  const hasLeadMessages = leads.length > 0;
 
   useEffect(() => {
-    if (leadMessages.length <= 1) {
+    if (leads.length <= 1) {
       return;
     }
 
     const timer = window.setInterval(() => {
-      setActiveSlide((prev) => (prev + 1) % leadMessages.length);
+      setActiveSlide((prev) => (prev + 1) % leads.length);
     }, 4500);
 
     return () => {
@@ -27,12 +34,12 @@ export default function FindWay() {
 
   const goPrev = () => {
     setActiveSlide(
-      (prev) => (prev - 1 + leadMessages.length) % leadMessages.length,
+      (prev) => (prev - 1 + leads.length) % leads.length,
     );
   };
 
   const goNext = () => {
-    setActiveSlide((prev) => (prev + 1) % leadMessages.length);
+    setActiveSlide((prev) => (prev + 1) % leads.length);
   };
 
   return hasLeadMessages ? (
@@ -67,17 +74,17 @@ export default function FindWay() {
             className="flex transition-transform duration-500 ease-out"
             style={{ transform: `translateX(-${activeSlide * 100}%)` }}
           >
-            {leadMessages.map((lead) => (
+            {leads.map((lead) => (
               <article
-                key={`${lead.name}-${lead.label}`}
+                key={lead.id}
                 className="card-rise min-w-full rounded-sm border border-black/10 bg-white p-4 sm:p-5"
               >
                 <div className="grid grid-cols-[96px_1fr] items-center gap-4 sm:grid-cols-[140px_1fr] sm:gap-5">
                   <div className="relative aspect-square overflow-hidden rounded-sm bg-[#e8ecef]">
                     <Image
                       src={
-                        lead.photo
-                          ? lead.photo
+                        lead.avatar
+                          ? lead.avatar
                           : "/images/profile-placeholder.webp"
                       }
                       alt={lead.name}
@@ -97,7 +104,7 @@ export default function FindWay() {
                         {lead.name}
                       </p>
                       <p className="text-xs uppercase tracking-[0.08em] text-black/50 sm:text-sm">
-                        {lead.label}
+                        {lead.role}
                       </p>
                     </div>
                   </div>
@@ -108,9 +115,9 @@ export default function FindWay() {
         </div>
 
         <div className="mt-4 flex items-center justify-center gap-2">
-          {leadMessages.map((lead, index) => (
+          {leads.map((lead, index) => (
             <button
-              key={`${lead.name}-dot`}
+              key={`${lead.id}-dot`}
               type="button"
               aria-label={`Go to lead message ${index + 1}`}
               onClick={() => setActiveSlide(index)}

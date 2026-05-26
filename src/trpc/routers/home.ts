@@ -5,6 +5,9 @@ import {
   deleteHeroSlideSchema,
   updateSuccessStatSchema,
   upsertDepartmentSchema,
+  upsertSiteSettingSchema,
+  upsertLeaderBoardSchema,
+  deleteLeaderBoardSchema,
 } from "@/trpc/schemas/home-schema";
 
 export const homeRouter = createTRPCRouter({
@@ -18,6 +21,18 @@ export const homeRouter = createTRPCRouter({
 
   getDepartments: baseProcedure.query(() =>
     prisma.department.findMany({ orderBy: { order: "asc" } }),
+  ),
+
+  getSiteSetting: baseProcedure.query(async () => {
+    let setting = await prisma.siteSetting.findUnique({ where: { id: 1 } });
+    if (!setting) {
+      setting = await prisma.siteSetting.create({ data: { id: 1 } });
+    }
+    return setting;
+  }),
+
+  getLeaderBoard: baseProcedure.query(() =>
+    prisma.leaderBoard.findMany({ orderBy: { order: "asc" } }),
   ),
 
   upsertHeroSlide: adminProcedure
@@ -58,4 +73,30 @@ export const homeRouter = createTRPCRouter({
       }
       return prisma.department.create({ data });
     }),
+
+  upsertSiteSetting: adminProcedure
+    .input(upsertSiteSettingSchema)
+    .mutation(async ({ input }) => {
+      return prisma.siteSetting.upsert({
+        where: { id: 1 },
+        update: input,
+        create: { id: 1, ...input },
+      });
+    }),
+
+  upsertLeaderBoard: adminProcedure
+    .input(upsertLeaderBoardSchema)
+    .mutation(async ({ input }) => {
+      const { id, ...data } = input;
+      if (id) {
+        return prisma.leaderBoard.update({ where: { id }, data });
+      }
+      return prisma.leaderBoard.create({ data });
+    }),
+
+  deleteLeaderBoard: adminProcedure
+    .input(deleteLeaderBoardSchema)
+    .mutation(({ input }) =>
+      prisma.leaderBoard.delete({ where: { id: input.id } }),
+    ),
 });
