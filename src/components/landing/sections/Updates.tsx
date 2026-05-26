@@ -1,13 +1,16 @@
-import {
-  ACTIVITY_CATEGORIES,
-  getLatestActivitiesByCategory,
-} from "@/lib/activities";
+import { getCaller } from "@/trpc/server";
 
 import SectionContainer from "@/components/landing/ui/SectionContainer";
-import UpdatesClient from "@/components/landing/sections/updates/UpdatesClient";
+import UpdatesClient from "@/components/landing/sections/updates/updates-client";
 
-export default function Updates() {
-  const postsByCategory = getLatestActivitiesByCategory(3);
+export default async function Updates() {
+  const caller = await getCaller();
+  const [categoriesData, postsByCategory] = await Promise.all([
+    caller.contentCategories.list(),
+    caller.activities.getLatestByCategory({ limit: 3 })
+  ]);
+
+  const categories = categoriesData.map(c => c.name);
 
   return (
     <section className="relative overflow-hidden bg-[#000000] py-16 text-white md:py-20">
@@ -23,7 +26,7 @@ export default function Updates() {
         </h3>
 
         <UpdatesClient
-          categories={[...ACTIVITY_CATEGORIES]}
+          categories={categories}
           postsByCategory={postsByCategory}
         />
       </SectionContainer>

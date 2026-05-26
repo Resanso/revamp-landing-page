@@ -1,0 +1,156 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model ContentCategory {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model Activity {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  date        DateTime
+  category    String // "Event", "Information", "Articles"
+  excerpt     String
+  coverImage  String
+  contentHtml String   @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ExecutiveMember {
+  id        Int      @id @default(autoincrement())
+  year      String // E.g., "2025"
+  name      String
+  nim       String
+  prodi     String
+  angkatan  String
+  position  String
+  linkedin  String?
+  instagram String?
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([nim, year])
+}
+
+model HallOfFame {
+  id          Int      @id @default(autoincrement())
+  year        String // E.g., "2024"
+  title       String
+  competition String   @db.Text
+  image       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model GalleryImage {
+  id          Int      @id @default(autoincrement())
+  year        String // E.g., "2025"
+  imageUrl    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AdmissionResult {
+  id        Int      @id @default(autoincrement())
+  nim       String   @unique
+  name      String
+  position  String
+  isPassed  Boolean  @map("lolos")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model HeroSlide {
+  id        String   @id @default(uuid())
+  src       String
+  alt       String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SuccessStat {
+  id        String   @id @default(uuid())
+  label     String
+  value     String
+  accent    String   @default("black")
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Department {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  img         String
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Singleton (id is always 1) holding destination links for the
+// competition section displayed on the public website.
+model Competition {
+  id         Int      @id @default(1)
+  gemastik   String   @default("")
+  lidm       String   @default("")
+  satriaData String   @default("")
+  pkm        String   @default("")
+  p2mw       String   @default("")
+  internal   String   @default("")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model AboutSlide {
+  id        Int      @id @default(autoincrement())
+  imageUrl  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AdminProfile {
+  id        String   @id @default(uuid())
+  nim       String   @unique
+  email     String   @unique // Email yang dipakai di Supabase Auth
+  name      String
+  userId    String   @unique // Supabase Auth User ID (auth.users.id)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SiteSetting {
+  id                 Int      @id @default(1)
+  departmentsBgImage String?
+  successStatImage   String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model LeaderBoard {
+  id        String   @id @default(uuid())
+  name      String
+  role      String
+  quote     String   @db.Text
+  avatar    String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+

@@ -1,34 +1,36 @@
-import {
-  getExecutiveGalleryImages,
-  getExecutiveGalleryYears,
-} from "@/lib/executive-gallery";
-
+import { getCaller } from "@/trpc/server";
 import { ArrowRight2 } from "iconsax-react";
 import ExecutiveGalleryClient from "@/components/executives/ExecutiveGalleryClient";
 import Link from "next/link";
-
-export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Executive Gallery | Prodigi",
   description: "Galeri dokumentasi kegiatan pengurus Prodigi.",
 };
 
-type ExecutiveGalleryPageProps = {
+type Props = {
   searchParams: Promise<{
     year?: string;
   }>;
 };
 
-export default async function ExecutiveGalleryPage({
-  searchParams,
-}: ExecutiveGalleryPageProps) {
+export default async function ExecutiveGalleryPage({ searchParams }: Props) {
+  const caller = await getCaller();
   const params = await searchParams;
-  const years = getExecutiveGalleryYears();
+
+  // Ambil tahun dari database
+  const years = await caller.gallery.getYears();
   const hasYears = years.length > 0;
+
   const activeYear =
-    params.year && years.includes(params.year) ? params.year : years[0];
-  const images = activeYear ? getExecutiveGalleryImages(activeYear) : [];
+    params.year && years.includes(params.year) ? params.year : (years[0] ?? "");
+
+  // Ambil URL gambar dari database
+  const images = activeYear
+    ? (await caller.gallery.getAll({ year: activeYear, limit: 200 })).images.map(
+        (img) => img.imageUrl,
+      )
+    : [];
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl px-4 py-14 md:px-8">
@@ -50,7 +52,6 @@ export default async function ExecutiveGalleryPage({
         <section className="mb-6 flex flex-wrap gap-2">
           {years.map((year) => {
             const isActive = year === activeYear;
-
             return (
               <Link
                 key={year}
