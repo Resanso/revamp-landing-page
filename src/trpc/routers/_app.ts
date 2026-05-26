@@ -20,5 +20,5 @@ export const appRouter = createTRPCRouter({
   contentCategories: contentCategoriesRouter,
   competition: competitionRouter,
 });
-
+// export type definition of API
 export type AppRouter = typeof appRouter;

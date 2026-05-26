@@ -1,14 +1,8 @@
 import Image from "next/image";
-
-type DepartmentItem = {
-  id: string;
-  title: string;
-  description: string;
-  img: string;
-};
+import { Departements } from "@/data/landing-content";
 
 type DepartementCardProps = {
-  department: DepartmentItem;
+  department: Departements;
 };
 
 export default function DepartementCard({ department }: DepartementCardProps) {

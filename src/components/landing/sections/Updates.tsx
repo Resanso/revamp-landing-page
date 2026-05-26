@@ -1,7 +1,7 @@
 import { getCaller } from "@/trpc/server";
 
 import SectionContainer from "@/components/landing/ui/SectionContainer";
-import UpdatesClient from "@/components/landing/sections/updates/updates-client";
+import UpdatesClient from "@/components/landing/sections/updates/UpdatesClient";
 
 export default async function Updates() {
   const caller = await getCaller();

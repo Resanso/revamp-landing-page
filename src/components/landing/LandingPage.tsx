@@ -19,6 +19,7 @@ export default async function LandingPage() {
     caller.home.getLeaderBoard(),
   ]);
 
+export default function LandingPage() {
   return (
     <div className="min-h-screen overflow-x-clip bg-[#f6f6f6] text-[#1f1f1f]">
       <Header />
