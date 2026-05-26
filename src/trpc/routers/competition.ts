@@ -1,6 +1,6 @@
-import { z } from "zod";
 import { adminProcedure, baseProcedure, createTRPCRouter } from "../init";
 import prisma from "@/lib/prisma";
+import { competitionUpdateSchema } from "@/trpc/schemas/competition-schema";
 
 const COMPETITION_ID = 1;
 
@@ -16,13 +16,6 @@ const linkSelect = {
   internal: true,
 } as const;
 
-// A destination link is either a valid URL or an empty string ("not set").
-const urlField = z
-  .string()
-  .trim()
-  .url("Masukkan URL yang valid.")
-  .or(z.literal(""));
-
 export const competitionRouter = createTRPCRouter({
   get: baseProcedure.query(async () => {
     const existing = await prisma.competition.findUnique({
@@ -37,16 +30,7 @@ export const competitionRouter = createTRPCRouter({
   }),
 
   update: adminProcedure
-    .input(
-      z.object({
-        gemastik: urlField.optional(),
-        lidm: urlField.optional(),
-        satriaData: urlField.optional(),
-        pkm: urlField.optional(),
-        p2mw: urlField.optional(),
-        internal: urlField.optional(),
-      }),
-    )
+    .input(competitionUpdateSchema)
     .mutation(({ input }) =>
       prisma.competition.upsert({
         where: { id: COMPETITION_ID },

@@ -1,6 +1,11 @@
-import { z } from "zod";
 import { adminProcedure, baseProcedure, createTRPCRouter } from "../init";
 import prisma from "@/lib/prisma";
+import {
+  upsertHeroSlideSchema,
+  deleteHeroSlideSchema,
+  updateSuccessStatSchema,
+  upsertDepartmentSchema,
+} from "@/trpc/schemas/home-schema";
 
 export const homeRouter = createTRPCRouter({
   getHeroSlides: baseProcedure.query(() =>
@@ -16,14 +21,7 @@ export const homeRouter = createTRPCRouter({
   ),
 
   upsertHeroSlide: adminProcedure
-    .input(
-      z.object({
-        id: z.string().optional(),
-        src: z.string().min(1),
-        alt: z.string().min(1),
-        order: z.number().int(),
-      }),
-    )
+    .input(upsertHeroSlideSchema)
     .mutation(async ({ input }) => {
       if (input.id) {
         return prisma.heroSlide.update({
@@ -37,20 +35,13 @@ export const homeRouter = createTRPCRouter({
     }),
 
   deleteHeroSlide: adminProcedure
-    .input(z.object({ id: z.string() }))
+    .input(deleteHeroSlideSchema)
     .mutation(({ input }) =>
       prisma.heroSlide.delete({ where: { id: input.id } }),
     ),
 
   updateSuccessStat: adminProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        label: z.string().min(1),
-        value: z.string().min(1),
-        accent: z.enum(["black", "primary"]),
-      }),
-    )
+    .input(updateSuccessStatSchema)
     .mutation(({ input }) =>
       prisma.successStat.update({
         where: { id: input.id },
@@ -59,15 +50,7 @@ export const homeRouter = createTRPCRouter({
     ),
 
   upsertDepartment: adminProcedure
-    .input(
-      z.object({
-        id: z.string().optional(),
-        title: z.string().min(1),
-        description: z.string().min(1),
-        img: z.string().min(1),
-        order: z.number().int(),
-      }),
-    )
+    .input(upsertDepartmentSchema)
     .mutation(async ({ input }) => {
       const { id, ...data } = input;
       if (id) {

@@ -1,6 +1,14 @@
-import { z } from "zod";
 import { adminProcedure, baseProcedure, createTRPCRouter } from "../init";
 import prisma from "@/lib/prisma";
+import {
+  activityGetAllSchema,
+  activityGetBySlugSchema,
+  activityGetLatestByCategorySchema,
+  activityGetByIdSchema,
+  activityCreateSchema,
+  activityUpdateSchema,
+  activityDeleteSchema,
+} from "@/trpc/schemas/activities-schema";
 import type { Prisma } from "../../../generated/prisma/client";
 import {
   ACTIVITY_CATEGORIES,
@@ -43,18 +51,11 @@ function toActivityMeta(post: {
   };
 }
 
-const categoryEnum = z.string().min(1);
+
 
 export const activitiesRouter = createTRPCRouter({
   getAll: baseProcedure
-    .input(
-      z.object({
-        category: z.string().optional(),
-        q: z.string().optional(),
-        page: z.number().int().min(1).default(1),
-        limit: z.number().int().min(1).max(50).default(9),
-      }),
-    )
+    .input(activityGetAllSchema)
     .query(async ({ input }) => {
       const { category, q, page, limit } = input;
 
@@ -92,7 +93,7 @@ export const activitiesRouter = createTRPCRouter({
     }),
 
   getBySlug: baseProcedure
-    .input(z.object({ slug: z.string() }))
+    .input(activityGetBySlugSchema)
     .query(async ({ input }) => {
       const post = await prisma.activity.findUnique({
         where: { slug: input.slug },
@@ -106,7 +107,7 @@ export const activitiesRouter = createTRPCRouter({
     }),
 
   getLatestByCategory: baseProcedure
-    .input(z.object({ limit: z.number().int().min(1).default(3) }))
+    .input(activityGetLatestByCategorySchema)
     .query(async ({ input }) => {
       const result = {} as Record<ActivityCategory, ActivityMeta[]>;
       await Promise.all(
@@ -132,7 +133,7 @@ export const activitiesRouter = createTRPCRouter({
     }),
 
   getById: baseProcedure
-    .input(z.object({ id: z.string() }))
+    .input(activityGetByIdSchema)
     .query(async ({ input }) => {
       const post = await prisma.activity.findUnique({ where: { id: input.id } });
       if (!post) return null;
@@ -144,15 +145,7 @@ export const activitiesRouter = createTRPCRouter({
     }),
 
   create: adminProcedure
-    .input(
-      z.object({
-        title: z.string().min(1),
-        excerpt: z.string().min(1),
-        category: categoryEnum,
-        coverImage: z.string().min(1),
-        contentMarkdown: z.string(),
-      }),
-    )
+    .input(activityCreateSchema)
     .mutation(async ({ input }) => {
       const { title, excerpt, category, coverImage, contentMarkdown } = input;
       const baseSlug = generateSlug(title);
@@ -164,16 +157,7 @@ export const activitiesRouter = createTRPCRouter({
     }),
 
   update: adminProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        title: z.string().min(1),
-        excerpt: z.string().min(1),
-        category: categoryEnum,
-        coverImage: z.string().min(1),
-        contentMarkdown: z.string(),
-      }),
-    )
+    .input(activityUpdateSchema)
     .mutation(async ({ input }) => {
       const { id, title, excerpt, category, coverImage, contentMarkdown } = input;
       const existing = await prisma.activity.findUniqueOrThrow({ where: { id } });
@@ -190,7 +174,7 @@ export const activitiesRouter = createTRPCRouter({
     }),
 
   delete: adminProcedure
-    .input(z.object({ id: z.string() }))
+    .input(activityDeleteSchema)
     .mutation(({ input }) =>
       prisma.activity.delete({ where: { id: input.id } }),
     ),

@@ -51,7 +51,7 @@ model HallOfFame {
   id          Int      @id @default(autoincrement())
   year        String // E.g., "2024"
   title       String
-  competition String @db.Text
+  competition String   @db.Text
   image       String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -60,9 +60,7 @@ model HallOfFame {
 model GalleryImage {
   id          Int      @id @default(autoincrement())
   year        String // E.g., "2025"
-  fileName    String
   imageUrl    String
-  description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -118,4 +116,21 @@ model Competition {
   internal   String   @default("")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+model AboutSlide {
+  id        Int      @id @default(autoincrement())
+  imageUrl  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AdminProfile {
+  id        String   @id @default(uuid())
+  nim       String   @unique
+  email     String   @unique // Email yang dipakai di Supabase Auth
+  name      String
+  userId    String   @unique // Supabase Auth User ID (auth.users.id)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

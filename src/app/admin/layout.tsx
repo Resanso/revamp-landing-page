@@ -18,6 +18,7 @@ export default async function AdminLayout({
   const meta = user.user_metadata ?? {};
   const name: string = meta.name ?? user.email ?? "Admin";
   const nim: string = meta.nim ?? "-";
+  console.log(user);
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#F9F9F9]">

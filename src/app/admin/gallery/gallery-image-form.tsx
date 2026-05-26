@@ -12,24 +12,21 @@ import { parseTRPCClientErrorMessage } from "@/lib/utils/error";
 type InitialData = {
   id: number;
   year: string;
-  fileName: string;
   imageUrl: string;
-  description: string | null;
 };
 
 type Props = {
   initial?: InitialData;
+  onSuccess?: () => void;
 };
 
-export default function GalleryImageForm({ initial }: Props) {
+export default function GalleryImageForm({ initial, onSuccess }: Props) {
   const router = useRouter();
   const trpc = useTRPC();
 
   const [form, setForm] = useState({
     year: initial?.year ?? "",
-    fileName: initial?.fileName ?? "",
     imageUrl: initial?.imageUrl ?? "",
-    description: initial?.description ?? "",
   });
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,19 +34,24 @@ export default function GalleryImageForm({ initial }: Props) {
 
   const createMutation = useMutation(
     trpc.gallery.create.mutationOptions({
-      onSuccess: () => router.push("/admin/gallery"),
+      onSuccess: () => {
+        if (onSuccess) onSuccess();
+        else router.push("/admin/gallery");
+      },
     }),
   );
 
   const updateMutation = useMutation(
     trpc.gallery.update.mutationOptions({
-      onSuccess: () => router.push("/admin/gallery"),
+      onSuccess: () => {
+        if (onSuccess) onSuccess();
+        else router.push("/admin/gallery");
+      },
     }),
   );
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-
     if (!file) return;
 
     setUploading(true);
@@ -65,16 +67,12 @@ export default function GalleryImageForm({ initial }: Props) {
       const { data: urlData } = supabase.storage
         .from("executives")
         .getPublicUrl(data.path);
-      setForm((prev) => ({
-        ...prev,
-        imageUrl: urlData.publicUrl,
-        fileName: file.name,
-      }));
+      setForm((prev) => ({ ...prev, imageUrl: urlData.publicUrl }));
     } catch (err) {
       if (err instanceof Error) {
-        setError(`Gagal upload: ${err.message}`);
+        setError(`Upload failed: ${err.message}`);
       } else {
-        setError("Gagal upload gambar. Coba lagi.");
+        setError("Failed to upload image. Please try again.");
       }
     } finally {
       setUploading(false);
@@ -87,16 +85,15 @@ export default function GalleryImageForm({ initial }: Props) {
     setFieldErrors({});
 
     if (!form.imageUrl) {
-      setError("Foto wajib diupload.");
+      setError("A photo is required.");
       return;
     }
 
     const payload = {
       year: form.year,
-      fileName: form.fileName,
       imageUrl: form.imageUrl,
-      description: form.description || null,
     };
+
     try {
       if (initial) {
         await updateMutation.mutateAsync({ id: initial.id, ...payload });
@@ -109,7 +106,7 @@ export default function GalleryImageForm({ initial }: Props) {
         setFieldErrors(parsedErrors);
       } else {
         if (err instanceof Error) setError(err.message);
-        else setError("Terjadi kesalahan. Coba lagi.");
+        else setError("An error occurred. Please try again.");
       }
     }
   };
@@ -124,14 +121,29 @@ export default function GalleryImageForm({ initial }: Props) {
         </p>
       )}
 
-      {/* Preview gambar */}
+      {/* Year */}
       <div>
-        <label className="mb-2 block text-sm font-medium">Foto Galeri *</label>
+        <label className="mb-1 block text-sm font-medium">Year *</label>
+        <input
+          type="text"
+          value={form.year}
+          onChange={(e) => setForm({ ...form, year: e.target.value })}
+          placeholder="2025"
+          className="w-full border border-black/20 px-3 py-2 text-sm outline-none focus:border-[#ffc91f]"
+        />
+        {fieldErrors.year && (
+          <p className="mt-1 text-xs text-red-500">{fieldErrors.year}</p>
+        )}
+      </div>
+
+      {/* Gallery Photo */}
+      <div>
+        <label className="mb-2 block text-sm font-medium">Gallery Photo *</label>
 
         <label className="cursor-pointer block w-full max-w-lg">
           {form.imageUrl ? (
             <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-[#D9D9D9]">
-              <Image src={form.imageUrl} alt="Preview foto galeri" fill className="object-cover" />
+              <Image src={form.imageUrl} alt="Gallery photo preview" fill className="object-cover" />
               <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                 <span className="text-white text-sm font-jakarta font-medium">Change photo</span>
               </div>
@@ -150,54 +162,10 @@ export default function GalleryImageForm({ initial }: Props) {
           <input type="file" accept="image/jpeg,image/png" onChange={handleImageUpload} className="hidden" />
         </label>
         {uploading && (
-          <p className="mt-2 text-xs text-black/50 font-jakarta">Mengupload...</p>
+          <p className="mt-2 text-xs text-black/50 font-jakarta">Uploading...</p>
         )}
-      </div>
-
-      {/* Tahun */}
-      <div>
-        <label className="mb-1 block text-sm font-medium">Tahun *</label>
-        <input
-          type="text"
-          value={form.year}
-          onChange={(e) => setForm({ ...form, year: e.target.value })}
-          placeholder="2025"
-          className="w-full border border-black/20 px-3 py-2 text-sm outline-none focus:border-[#ffc91f]"
-        />
-        {fieldErrors.year && (
-          <p className="mt-1 text-xs text-red-500">{fieldErrors.year}</p>
-        )}
-      </div>
-
-      {/* Nama File */}
-      <div>
-        <label className="mb-1 block text-sm font-medium">Nama File *</label>
-        <input
-          type="text"
-          value={form.fileName}
-          onChange={(e) => setForm({ ...form, fileName: e.target.value })}
-          placeholder="foto-kegiatan-2025.jpg"
-          className="w-full border border-black/20 px-3 py-2 text-sm outline-none focus:border-[#ffc91f]"
-        />
-        {fieldErrors.fileName && (
-          <p className="mt-1 text-xs text-red-500">{fieldErrors.fileName}</p>
-        )}
-      </div>
-
-      {/* Deskripsi */}
-      <div>
-        <label className="mb-1 block text-sm font-medium">
-          Deskripsi <span className="text-black/40">(opsional)</span>
-        </label>
-        <input
-          type="text"
-          value={form.description}
-          onChange={(e) => setForm({ ...form, description: e.target.value })}
-          placeholder="Keterangan foto..."
-          className="w-full border border-black/20 px-3 py-2 text-sm outline-none focus:border-[#ffc91f]"
-        />
-        {fieldErrors.description && (
-          <p className="mt-1 text-xs text-red-500">{fieldErrors.description}</p>
+        {fieldErrors.imageUrl && (
+          <p className="mt-1 text-xs text-red-500">{fieldErrors.imageUrl}</p>
         )}
       </div>
 
@@ -209,17 +177,20 @@ export default function GalleryImageForm({ initial }: Props) {
           className="bg-[#ffc91f] px-6 py-2 text-sm font-semibold text-black transition hover:bg-[#ffb901] disabled:opacity-60"
         >
           {isPending
-            ? "Menyimpan..."
+            ? "Saving..."
             : initial
-              ? "Simpan Perubahan"
-              : "Tambah Foto"}
+              ? "Save Changes"
+              : "Add Photo"}
         </button>
         <button
           type="button"
-          onClick={() => router.push("/admin/gallery")}
+          onClick={() => {
+            if (onSuccess) onSuccess();
+            else router.push("/admin/gallery");
+          }}
           className="border border-black/20 px-6 py-2 text-sm font-medium transition hover:bg-black/5"
         >
-          Batal
+          Cancel
         </button>
       </div>
     </form>

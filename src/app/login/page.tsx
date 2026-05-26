@@ -26,7 +26,7 @@ export default async function LoginPage() {
           style={{ boxShadow: "0px 20px 40px -10px rgba(27,73,101,0.08)" }}
         >
           {/* Logo */}
-          <div className="flex items-center justify-start">
+          <div className="flex items-center justify-center">
             <Image
               src="/images/logo-landscape.png"
               alt="PRODIGI"
