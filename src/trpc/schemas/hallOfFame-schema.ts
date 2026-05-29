@@ -58,3 +58,7 @@ export const hallOfFameIdSchema = z.object({
   id: z.number(),
 });
 
+export const hofPeriodCreateSchema = z.object({
+  year: z.string().regex(/^\d{4}$/, "Format tahun tidak valid (contoh: 2024)"),
+});
+

@@ -5,6 +5,7 @@ import {
   hallOfFameUpdateSchema,
   hallOfFameGetByYearSchema,
   hallOfFameIdSchema,
+  hofPeriodCreateSchema,
 } from "@/trpc/schemas/hallOfFame-schema";
 import prisma from "@/lib/prisma";
 import { Prisma } from "../../../generated/prisma/client";
@@ -51,12 +52,20 @@ export const hallOfFameRouter = createTRPCRouter({
   }),
 
   getYears: baseProcedure.query(async () => {
-    const distinctYearsResult = await prisma.hallOfFame.findMany({
-      select: { year: true },
-      distinct: ["year"],
-      orderBy: { year: "desc" },
-    });
-    return distinctYearsResult.map((item) => item.year);
+    const [hofYears, periodYears] = await Promise.all([
+      prisma.hallOfFame.findMany({
+        select: { year: true },
+        distinct: ["year"],
+      }),
+      prisma.hofPeriod.findMany({
+        select: { year: true },
+      }),
+    ]);
+    const all = new Set([
+      ...hofYears.map((r) => r.year),
+      ...periodYears.map((r) => r.year),
+    ]);
+    return Array.from(all).sort((a, b) => b.localeCompare(a));
   }),
 
   getByYear: baseProcedure
@@ -100,5 +109,15 @@ export const hallOfFameRouter = createTRPCRouter({
     .input(hallOfFameIdSchema)
     .mutation(({ input }) =>
       prisma.hallOfFame.delete({ where: { id: input.id } }),
+    ),
+
+  createPeriod: adminProcedure
+    .input(hofPeriodCreateSchema)
+    .mutation(({ input }) =>
+      prisma.hofPeriod.upsert({
+        where: { year: input.year },
+        create: { year: input.year },
+        update: {},
+      }),
     ),
 });
