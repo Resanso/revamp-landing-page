@@ -8,7 +8,7 @@ import {
   SearchNormal1,
   TagUser,
 } from "iconsax-react";
-import { heroActions, heroSlides } from "@/data/landing-content";
+import { heroActions } from "@/data/landing-content";
 import { useEffect, useMemo, useState } from "react";
 
 import { FaExternalLinkAlt } from "react-icons/fa";
@@ -24,7 +24,13 @@ const iconMap = {
   TagUser,
 } as const;
 
-export default function Hero() {
+type Slide = { id: string; src: string; alt: string; order: number };
+
+type HeroProps = {
+  slides: Slide[];
+};
+
+export default function Hero({ slides }: HeroProps) {
   const { openContactModal } = useContactModal();
   const [activeSlide, setActiveSlide] = useState(0);
   const [headerHeight, setHeaderHeight] = useState(170);
@@ -49,19 +55,20 @@ export default function Hero() {
   }, []);
 
   useEffect(() => {
+    if (slides.length === 0) return;
     const timer = window.setInterval(() => {
-      setActiveSlide((prev) => (prev + 1) % heroSlides.length);
+      setActiveSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
 
     return () => window.clearInterval(timer);
-  }, []);
+  }, [slides.length]);
 
   return (
     <section
       className="relative overflow-hidden border-b border-black/10 bg-[#efeeeb]"
       style={{ minHeight: heroHeight }}
     >
-      {heroSlides.map((slide, index) => (
+      {slides.map((slide, index) => (
         <div
           key={slide.src}
           className={`absolute inset-0 transition-opacity duration-700 ${
@@ -106,7 +113,6 @@ export default function Hero() {
                   : "bg-white text-[#171717] hover:bg-[#f6f6f6]"
               } ${index < heroActions.length - 1 ? "border-b border-black/10" : ""} ${index % 2 === 0 ? "sm:border-r sm:border-black/10" : ""} ${index < 2 ? "sm:border-b sm:border-black/10" : "sm:border-b-0"}`;
 
-              /* Partnership opens the modal */
               if (action.label === "Partnership") {
                 return (
                   <button
@@ -146,19 +152,21 @@ export default function Hero() {
           </p>
         </div>
 
-        <div className="absolute bottom-6 right-5 z-20 flex items-center gap-2 md:bottom-8 md:right-8">
-          {heroSlides.map((slide, index) => (
-            <button
-              key={`dot-${slide.src}`}
-              type="button"
-              onClick={() => setActiveSlide(index)}
-              aria-label={`Go to slide ${index + 1}`}
-              className={`h-1.5 w-1.5 rounded-full transition cursor-pointer ${
-                activeSlide === index ? "bg-white px-6" : "bg-white/55"
-              }`}
-            />
-          ))}
-        </div>
+        {slides.length > 1 && (
+          <div className="absolute bottom-6 right-5 z-20 flex items-center gap-2 md:bottom-8 md:right-8">
+            {slides.map((slide, index) => (
+              <button
+                key={`dot-${slide.src}`}
+                type="button"
+                onClick={() => setActiveSlide(index)}
+                aria-label={`Go to slide ${index + 1}`}
+                className={`h-1.5 w-1.5 rounded-full transition cursor-pointer ${
+                  activeSlide === index ? "bg-white px-6" : "bg-white/55"
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
