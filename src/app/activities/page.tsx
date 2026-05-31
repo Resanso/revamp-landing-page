@@ -1,4 +1,5 @@
-import { ACTIVITY_CATEGORIES, getAllActivitiesMeta } from "@/lib/activities";
+
+import { getCaller } from "@/trpc/server";
 import { ArrowRight2, SearchNormal1 } from "iconsax-react";
 
 import Image from "next/image";
@@ -23,39 +24,31 @@ export default async function ActivitiesPage({
   searchParams,
 }: ActivitiesPageProps) {
   const params = await searchParams;
-  const posts = getAllActivitiesMeta();
-  const activeCategory = ACTIVITY_CATEGORIES.includes(
-    params.category as (typeof ACTIVITY_CATEGORIES)[number],
-  )
-    ? (params.category as (typeof ACTIVITY_CATEGORIES)[number])
-    : "All";
 
-  const searchQuery = (params.q ?? "").trim().toLowerCase();
+  const caller = await getCaller();
+  const rawCategories = await caller.contentCategories.list();
+  const categoryTabs = ["All", ...rawCategories.map(c => c.name)];
 
-  const filteredPosts = posts.filter((post) => {
-    const categoryMatch =
-      activeCategory === "All" ? true : post.category === activeCategory;
-    const textMatch = searchQuery
-      ? `${post.title} ${post.excerpt}`.toLowerCase().includes(searchQuery)
-      : true;
-
-    return categoryMatch && textMatch;
-  });
+  const activeCategory = categoryTabs.includes(params.category as string) && params.category !== "All"
+    ? params.category as string
+    : undefined;
 
   const requestedPage = Number(params.page ?? "1");
   const normalizedPage =
     Number.isFinite(requestedPage) && requestedPage > 0
       ? Math.floor(requestedPage)
       : 1;
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredPosts.length / ITEMS_PER_PAGE),
-  );
-  const currentPage = Math.min(normalizedPage, totalPages);
-  const paginatedPosts = filteredPosts.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE,
-  );
+
+
+  const { posts, totalCount } = await caller.activities.getAll({
+    category: activeCategory,
+    q: searchQuery || undefined,
+    page: currentPage,
+    limit: ITEMS_PER_PAGE,
+  });
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE));
+  const safePage = Math.min(currentPage, totalPages);
 
   const buildPageHref = (page: number) => {
     const nextParams = new URLSearchParams();
@@ -75,7 +68,7 @@ export default async function ActivitiesPage({
     return `/activities${nextParams.toString() ? `?${nextParams.toString()}` : ""}`;
   };
 
-  const categoryTabs = ["All", ...ACTIVITY_CATEGORIES] as const;
+
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl px-4 py-14 md:px-8">

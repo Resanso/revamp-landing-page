@@ -8,7 +8,9 @@ import {
   topBarMainLinks,
   topBarSwitches,
 } from "@/data/landing-content";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { useTRPC } from "@/trpc/client";
+import { useQuery } from "@tanstack/react-query";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -43,6 +45,42 @@ function isGroupedColumns(columns: unknown[]): columns is NavGroupedColumn[] {
 
 export default function Header() {
   const { openContactModal } = useContactModal();
+  const trpc = useTRPC();
+  const { data: competition } = useQuery(
+    trpc.competition.get.queryOptions(),
+  );
+
+  // Overlay the live competition destination links (managed in the admin
+  // panel) on top of the static nav config, matched by link label.
+  const navItems = useMemo(() => {
+    if (!competition) return mainNavItems;
+    const urlByLabel: Record<string, string> = {
+      Gemastik: competition.gemastik,
+      LIDM: competition.lidm,
+      "Satria Data": competition.satriaData,
+      PKM: competition.pkm,
+      P2MW: competition.p2mw,
+      Adikara: competition.internal,
+    };
+    return mainNavItems.map((item) => {
+      if (item.label !== "Competitions" || !item.columns) return item;
+      return {
+        ...item,
+        columns: item.columns.map((column) =>
+          "links" in column
+            ? {
+                ...column,
+                links: column.links.map((link) => ({
+                  ...link,
+                  href: urlByLabel[link.label] || link.href,
+                })),
+              }
+            : column,
+        ),
+      };
+    });
+  }, [competition]);
+
   const [hasMounted, setHasMounted] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -259,7 +297,7 @@ export default function Header() {
         </div>
 
         <nav className="hidden items-center px-2 lg:flex">
-          {mainNavItems.map((item) => (
+          {navItems.map((item) => (
             <div key={item.label} className="nav-item group relative">
               {item.columns ? (
                 <button
@@ -373,7 +411,7 @@ export default function Header() {
 
                   <nav className="flex-1 overflow-y-auto px-5 py-5">
                     <div className="space-y-1">
-                      {mainNavItems.map((item) => {
+                      {navItems.map((item) => {
                         if (!item.columns) {
                           if (item.link === "/contact") {
                             return (

@@ -10,6 +10,10 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-jakarta-sans);
   --font-serif: var(--font-jakarta-sans);
+  --font-jakarta: var(--font-jakarta-sans);
+  --admin-btn-px: 2.5rem;
+  --admin-btn-py: 1rem;
+  --admin-btn-h: 52px;
 }
 
 body {

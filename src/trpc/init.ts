@@ -6,8 +6,11 @@ import { initTRPC } from '@trpc/server';
  * API route handler (where you pass the request headers).
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-  // const user = await auth(opts.headers);
-  return { userId: 'user_123' };
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return { supabase, user };
 };
  
 // Avoid exporting the entire t-object

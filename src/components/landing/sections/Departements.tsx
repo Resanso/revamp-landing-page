@@ -7,17 +7,28 @@ import SectionContainer from "@/components/landing/ui/SectionContainer";
 import { departements } from "@/data/landing-content";
 import DepartementCard from "@/components/landing/ui/DepartementCard";
 
-export default function Departements() {
-  const [activeDeptId, setActiveDeptId] = useState<number | string | null>(
-    null,
-  );
-  const activeDepartment = departements.find((d) => d.id === activeDeptId);
+type DepartmentItem = {
+  id: string;
+  title: string;
+  description: string;
+  img: string;
+  order: number;
+};
+
+type DepartementsProps = {
+  departments: DepartmentItem[];
+  siteSetting: { departmentsBgImage?: string | null };
+};
+
+export default function Departements({ departments, siteSetting }: DepartementsProps) {
+  const [activeDeptId, setActiveDeptId] = useState<string | null>(null);
+  const activeDepartment = departments.find((d) => d.id === activeDeptId);
 
   return (
     <section className="relative overflow-hidden py-16">
       <div className="absolute inset-0">
         <Image
-          src="/images/slide1.jpg"
+          src={siteSetting.departmentsBgImage || "/images/slide1.jpg"}
           alt="Campus facade"
           fill
           loading="lazy"

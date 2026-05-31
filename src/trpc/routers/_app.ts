@@ -1,17 +1,24 @@
-import { z } from "zod";
-import { baseProcedure, createTRPCRouter } from "../init";
+import { createTRPCRouter } from "../init";
+import { activitiesRouter } from "./activities";
+import { authRouter } from "./auth";
+import { competitionRouter } from "./competition";
+import { contentCategoriesRouter } from "./content-categories";
+import { hallOfFameRouter } from "./hall-of-fame";
+import { homeRouter } from "./home";
+import { executivesRouter } from "./executives";
+import { galleryRouter } from "./gallery";
+import { aboutRouter } from "./about";
+
 export const appRouter = createTRPCRouter({
-  hello: baseProcedure
-    .input(
-      z.object({
-        text: z.string(),
-      }),
-    )
-    .query((opts) => {
-      return {
-        greeting: `hello ${opts.input.text}`,
-      };
-    }),
+  auth: authRouter,
+  about: aboutRouter,
+  home: homeRouter,
+  hallOfFame: hallOfFameRouter,
+  activities: activitiesRouter,
+  executives: executivesRouter,
+  gallery: galleryRouter,
+  contentCategories: contentCategoriesRouter,
+  competition: competitionRouter,
 });
 // export type definition of API
 export type AppRouter = typeof appRouter;
