@@ -57,6 +57,12 @@ model HallOfFame {
   updatedAt   DateTime @updatedAt
 }
 
+model HofPeriod {
+  id        Int      @id @default(autoincrement())
+  year      String   @unique // E.g., "2024"
+  createdAt DateTime @default(now())
+}
+
 model GalleryImage {
   id          Int      @id @default(autoincrement())
   year        String // E.g., "2025"

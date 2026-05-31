@@ -29,6 +29,8 @@ export default function HofPanel({ years, entriesByYear }: Props) {
 
   const [activeYear, setActiveYear] = useState(years[0] ?? "");
   const [search, setSearch] = useState("");
+
+  // Achievement form state
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Entry | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Entry | null>(null);
@@ -37,7 +39,13 @@ export default function HofPanel({ years, entriesByYear }: Props) {
   const [formTitle, setFormTitle] = useState("");
   const [formCompetition, setFormCompetition] = useState("");
   const [formImage, setFormImage] = useState("");
+  const [formImageFile, setFormImageFile] = useState<File | null>(null);
+  const [formImagePreview, setFormImagePreview] = useState("");
   const [uploading, setUploading] = useState(false);
+
+  // Period form state
+  const [showPeriodForm, setShowPeriodForm] = useState(false);
+  const [formPeriodYear, setFormPeriodYear] = useState("");
 
   const createMutation = useMutation(
     trpc.hallOfFame.create.mutationOptions({ onSuccess: () => { resetForm(); router.refresh(); } }),
@@ -48,6 +56,15 @@ export default function HofPanel({ years, entriesByYear }: Props) {
   const deleteMutation = useMutation(
     trpc.hallOfFame.delete.mutationOptions({ onSuccess: () => router.refresh() }),
   );
+  const createPeriodMutation = useMutation(
+    trpc.hallOfFame.createPeriod.mutationOptions({
+      onSuccess: () => {
+        setShowPeriodForm(false);
+        setFormPeriodYear("");
+        router.refresh();
+      },
+    }),
+  );
 
   const resetForm = () => {
     setShowForm(false);
@@ -56,6 +73,9 @@ export default function HofPanel({ years, entriesByYear }: Props) {
     setFormTitle("");
     setFormCompetition("");
     setFormImage("");
+    setFormImageFile(null);
+    if (formImagePreview.startsWith("blob:")) URL.revokeObjectURL(formImagePreview);
+    setFormImagePreview("");
   };
 
   const openCreate = () => {
@@ -64,6 +84,8 @@ export default function HofPanel({ years, entriesByYear }: Props) {
     setFormTitle("");
     setFormCompetition("");
     setFormImage("");
+    setFormImageFile(null);
+    setFormImagePreview("");
     setShowForm(true);
   };
 
@@ -73,34 +95,58 @@ export default function HofPanel({ years, entriesByYear }: Props) {
     setFormTitle(entry.title);
     setFormCompetition(entry.competition);
     setFormImage(entry.image);
+    setFormImageFile(null);
+    setFormImagePreview(entry.image);
     setShowForm(true);
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploading(true);
-    try {
-      const supabase = createClient();
-      const path = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
-      const { data, error } = await supabase.storage.from("hall-of-fame").upload(path, file, { upsert: true });
-      if (error || !data) throw error;
-      const { data: urlData } = supabase.storage.from("hall-of-fame").getPublicUrl(data.path);
-      setFormImage(urlData.publicUrl);
-    } finally {
-      setUploading(false);
-      e.target.value = "";
-    }
+    if (formImagePreview.startsWith("blob:")) URL.revokeObjectURL(formImagePreview);
+    const previewUrl = URL.createObjectURL(file);
+    setFormImageFile(file);
+    setFormImagePreview(previewUrl);
+    e.target.value = "";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = { year: formYear, title: formTitle, competition: formCompetition, image: formImage };
+
+    let imageUrl = formImage;
+
+    if (formImageFile) {
+      setUploading(true);
+      try {
+        const supabase = createClient();
+        const path = `${Date.now()}-${formImageFile.name.replace(/\s+/g, "-")}`;
+        const { data, error } = await supabase.storage
+          .from("hall-of-fame")
+          .upload(path, formImageFile, { upsert: true });
+        if (error || !data) throw error ?? new Error("Upload failed");
+        const { data: urlData } = supabase.storage.from("hall-of-fame").getPublicUrl(data.path);
+        imageUrl = urlData.publicUrl;
+      } catch (err) {
+        console.error("Image upload failed:", err);
+        alert("Gagal mengupload gambar. Silakan coba lagi.");
+        setUploading(false);
+        return;
+      } finally {
+        setUploading(false);
+      }
+    }
+
+    const payload = { year: formYear, title: formTitle, competition: formCompetition, image: imageUrl };
     if (editing) {
       await updateMutation.mutateAsync({ id: editing.id, ...payload });
     } else {
       await createMutation.mutateAsync(payload);
     }
+  };
+
+  const handlePeriodSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await createPeriodMutation.mutateAsync({ year: formPeriodYear });
   };
 
   const currentEntries = (entriesByYear[activeYear] ?? []).filter((e) =>
@@ -110,6 +156,7 @@ export default function HofPanel({ years, entriesByYear }: Props) {
   );
 
   const isPending = createMutation.isPending || updateMutation.isPending;
+  const displayImage = formImagePreview || formImage;
 
   return (
     <div className="bg-white rounded-lg border border-[#D9D9D9] px-8 py-8 flex flex-col gap-6">
@@ -119,7 +166,7 @@ export default function HofPanel({ years, entriesByYear }: Props) {
         <div className="flex items-center gap-4 flex-wrap">
           <button
             type="button"
-            onClick={() => { setFormYear(""); openCreate(); }}
+            onClick={() => { setFormPeriodYear(""); setShowPeriodForm(true); }}
             className="px-10 py-4 bg-white rounded-lg border border-dashed border-[#FFC917] flex justify-center items-center hover:bg-yellow-50 transition-colors"
           >
             <span className="text-[#FFC917] text-base font-medium font-jakarta">New Period</span>
@@ -203,7 +250,38 @@ export default function HofPanel({ years, entriesByYear }: Props) {
         ))}
       </div>
 
-      {/* Add / Edit Modal */}
+      {/* Add New Period Modal */}
+      <AdminModal
+        open={showPeriodForm}
+        onOpenChange={setShowPeriodForm}
+        title="Add New Period"
+      >
+        <form onSubmit={handlePeriodSubmit} className="flex flex-col gap-4 pt-2">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium font-jakarta text-black">Period Year</label>
+            <input
+              type="text"
+              required
+              pattern="\d{4}"
+              value={formPeriodYear}
+              onChange={(e) => setFormPeriodYear(e.target.value)}
+              className="w-full border border-[#D9D9D9] rounded-lg px-4 py-3 text-sm outline-none focus:border-[#FFC917] font-jakarta"
+              placeholder="2024"
+              maxLength={4}
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={createPeriodMutation.isPending}
+            className="w-full bg-[#FFC917] hover:bg-[#ffb901] py-4 rounded-lg text-base font-semibold text-black disabled:opacity-60 transition-colors font-jakarta mt-2"
+          >
+            {createPeriodMutation.isPending ? "Menyimpan..." : "Save"}
+          </button>
+        </form>
+      </AdminModal>
+
+      {/* Add / Edit Achievement Modal */}
       <AdminModal
         open={showForm}
         onOpenChange={setShowForm}
@@ -211,9 +289,9 @@ export default function HofPanel({ years, entriesByYear }: Props) {
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
           <label className="cursor-pointer block">
-            {formImage ? (
+            {displayImage ? (
               <div className="relative w-full h-[200px] rounded-lg overflow-hidden border border-[#D9D9D9]">
-                <Image src={formImage} alt="Preview" fill className="object-cover" />
+                <Image src={displayImage} alt="Preview" fill className="object-cover" unoptimized={displayImage.startsWith("blob:")} />
                 <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                   <span className="text-white text-sm font-jakarta font-medium">Change photo</span>
                 </div>
@@ -229,10 +307,14 @@ export default function HofPanel({ years, entriesByYear }: Props) {
                 </div>
               </div>
             )}
-            <input type="file" accept="image/jpeg,image/png" onChange={handleImageUpload} className="hidden" />
+            <input type="file" accept="image/jpeg,image/png" onChange={handleImageSelect} className="hidden" />
           </label>
 
-          {uploading && <p className="text-xs text-black/50 font-jakarta">Uploading...</p>}
+          {formImageFile && (
+            <p className="text-xs text-black/50 font-jakarta">
+              {uploading ? "Mengupload gambar..." : `Gambar dipilih: ${formImageFile.name}`}
+            </p>
+          )}
 
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium font-jakarta text-black">Judul Pencapaian</label>
@@ -275,7 +357,7 @@ export default function HofPanel({ years, entriesByYear }: Props) {
             disabled={isPending || uploading}
             className="w-full bg-[#FFC917] hover:bg-[#ffb901] py-4 rounded-lg text-base font-semibold text-black disabled:opacity-60 transition-colors font-jakarta mt-2"
           >
-            {isPending ? "Menyimpan..." : "Save"}
+            {isPending || uploading ? "Menyimpan..." : "Save"}
           </button>
         </form>
       </AdminModal>
